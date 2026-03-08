@@ -1,0 +1,448 @@
+import React, { useState, useEffect } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
+import Navbar from '../components/Navbar';
+import Footer from '../components/Footer';
+import { bookingAPI } from '../services/api';
+import { toast } from 'react-toastify';
+
+function BookingDetails() {
+  const { id } = useParams();
+  const navigate = useNavigate();
+  const [booking, setBooking] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const userType = localStorage.getItem('userType');
+
+  useEffect(() => {
+    fetchBooking();
+  }, [id]);
+
+  const fetchBooking = async () => {
+    try {
+      setLoading(true);
+      const response = await bookingAPI.getById(id);
+      setBooking(response.data.data);
+    } catch (error) {
+      console.error('Error fetching booking:', error);
+      toast.error('Failed to load booking details');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleAccept = async () => {
+    try {
+      await bookingAPI.acceptBooking(id);
+      toast.success('Booking accepted! 🎉');
+      fetchBooking();
+    } catch (error) {
+      toast.error('Failed to accept booking');
+    }
+  };
+
+  const handleReject = async () => {
+    try {
+      await bookingAPI.rejectBooking(id);
+      toast.success('Booking rejected');
+      fetchBooking();
+    } catch (error) {
+      toast.error('Failed to reject booking');
+    }
+  };
+
+  const handleStartService = async () => {
+    try {
+      await bookingAPI.startService(id);
+      toast.success('Service started! ⚡');
+      fetchBooking();
+    } catch (error) {
+      toast.error('Failed to start service');
+    }
+  };
+
+  const handleComplete = async () => {
+    const finalAmount = prompt('Enter final amount (₹):');
+    if (!finalAmount) return;
+
+    try {
+      await bookingAPI.completeBooking(id, { finalAmount: parseInt(finalAmount) });
+      toast.success('Service completed! 💰');
+      fetchBooking();
+    } catch (error) {
+      toast.error('Failed to complete service');
+    }
+  };
+
+  const handleCancel = async () => {
+    const reason = prompt('Reason for cancellation:');
+    if (!reason) return;
+
+    try {
+      await bookingAPI.cancelBooking(id);
+      toast.success('Booking cancelled');
+      fetchBooking();
+    } catch (error) {
+      toast.error('Failed to cancel booking');
+    }
+  };
+
+  const getStatusColor = (status) => {
+    const colors = {
+      pending: 'bg-yellow-100 text-yellow-800 border-yellow-300',
+      accepted: 'bg-blue-100 text-blue-800 border-blue-300',
+      'in-progress': 'bg-purple-100 text-purple-800 border-purple-300',
+      completed: 'bg-green-100 text-green-800 border-green-300',
+      rejected: 'bg-red-100 text-red-800 border-red-300',
+      cancelled: 'bg-gray-100 text-gray-800 border-gray-300'
+    };
+    return colors[status] || 'bg-gray-100 text-gray-800 border-gray-300';
+  };
+
+  const getStatusIcon = (status) => {
+    const icons = {
+      pending: '⏳',
+      accepted: '✅',
+      'in-progress': '⚡',
+      completed: '🎉',
+      rejected: '❌',
+      cancelled: '🚫'
+    };
+    return icons[status] || '📋';
+  };
+
+  if (loading) {
+    return (
+      <>
+        <Navbar />
+        <div className="min-h-screen flex items-center justify-center">
+          <div className="text-center">
+            <div className="w-16 h-16 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+            <p className="text-gray-600">Loading booking details...</p>
+          </div>
+        </div>
+        <Footer />
+      </>
+    );
+  }
+
+  if (!booking) {
+    return (
+      <>
+        <Navbar />
+        <div className="min-h-screen flex items-center justify-center">
+          <div className="text-center">
+            <div className="text-6xl mb-4">😕</div>
+            <h2 className="text-2xl font-bold text-gray-800 mb-2">Booking Not Found</h2>
+            <button
+              onClick={() => navigate(-1)}
+              className="px-6 py-3 bg-primary text-white rounded-lg font-semibold hover:bg-blue-600"
+            >
+              Go Back
+            </button>
+          </div>
+        </div>
+        <Footer />
+      </>
+    );
+  }
+
+  return (
+    <>
+      <Navbar />
+
+      <div className="min-h-screen bg-gray-50 py-12 px-4">
+        <div className="max-w-4xl mx-auto">
+          
+          {/* Header */}
+          <div className="mb-8">
+            <button
+              onClick={() => navigate(-1)}
+              className="text-primary hover:underline mb-4 flex items-center space-x-2"
+            >
+              <span>←</span>
+              <span>Back</span>
+            </button>
+            
+            <div className="flex items-center justify-between">
+              <div>
+                <h1 className="text-4xl font-bold text-gray-800 mb-2">
+                  Booking Details
+                </h1>
+                <p className="text-gray-600">Booking ID: {booking.bookingId || booking._id}</p>
+              </div>
+              <div className={`px-6 py-3 rounded-xl border-2 font-bold text-lg ${getStatusColor(booking.status)}`}>
+                {getStatusIcon(booking.status)} {booking.status.toUpperCase()}
+              </div>
+            </div>
+          </div>
+
+          {/* Main Content */}
+          <div className="grid md:grid-cols-3 gap-6">
+            
+            {/* Left Column - Booking Info */}
+            <div className="md:col-span-2 space-y-6">
+              
+              {/* Customer Info */}
+              <div className="bg-white rounded-2xl shadow-lg p-6">
+                <h2 className="text-2xl font-bold text-gray-800 mb-4">
+                  👤 Customer Information
+                </h2>
+                <div className="space-y-3">
+                  <div className="flex items-center space-x-3">
+                    <span className="text-gray-600 w-24">Name:</span>
+                    <span className="font-semibold">{booking.customer?.name}</span>
+                  </div>
+                  <div className="flex items-center space-x-3">
+                    <span className="text-gray-600 w-24">Phone:</span>
+                    <span className="font-semibold">{booking.customer?.phone}</span>
+                  </div>
+                  {booking.customer?.email && (
+                    <div className="flex items-center space-x-3">
+                      <span className="text-gray-600 w-24">Email:</span>
+                      <span className="font-semibold">{booking.customer.email}</span>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Worker Info (for customers) */}
+              {userType === 'user' && booking.worker && (
+                <div className="bg-white rounded-2xl shadow-lg p-6">
+                  <h2 className="text-2xl font-bold text-gray-800 mb-4">
+                    👨‍🔧 Worker Information
+                  </h2>
+                  <div className="space-y-3">
+                    <div className="flex items-center space-x-3">
+                      <span className="text-gray-600 w-24">Name:</span>
+                      <span className="font-semibold">{booking.worker?.name}</span>
+                    </div>
+                    <div className="flex items-center space-x-3">
+                      <span className="text-gray-600 w-24">Phone:</span>
+                      <span className="font-semibold">{booking.worker?.phone}</span>
+                    </div>
+                    <div className="flex items-center space-x-3">
+                      <span className="text-gray-600 w-24">Category:</span>
+                      <span className="font-semibold">{booking.category?.name}</span>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Service Details */}
+              <div className="bg-white rounded-2xl shadow-lg p-6">
+                <h2 className="text-2xl font-bold text-gray-800 mb-4">
+                  🔧 Service Details
+                </h2>
+                <div className="space-y-4">
+                  <div>
+                    <h3 className="text-sm text-gray-600 mb-1">Category</h3>
+                    <p className="font-semibold text-lg">
+                      {booking.category?.icon} {booking.category?.name}
+                    </p>
+                  </div>
+                  <div>
+                    <h3 className="text-sm text-gray-600 mb-1">Problem Description</h3>
+                    <p className="font-semibold">{booking.serviceDetails?.problemDescription}</p>
+                  </div>
+                  <div>
+                    <h3 className="text-sm text-gray-600 mb-1">Service Address</h3>
+                    <p className="font-semibold">
+                      {booking.serviceDetails?.serviceAddress?.address}, {booking.serviceDetails?.serviceAddress?.city}
+                      {booking.serviceDetails?.serviceAddress?.pincode && ` - ${booking.serviceDetails.serviceAddress.pincode}`}
+                    </p>
+                  </div>
+                  <div>
+                    <h3 className="text-sm text-gray-600 mb-1">Scheduled Date & Time</h3>
+                    <p className="font-semibold">
+                      📅 {new Date(booking.scheduledDate).toLocaleDateString('en-IN', { 
+                        weekday: 'long', 
+                        year: 'numeric', 
+                        month: 'long', 
+                        day: 'numeric' 
+                      })}
+                    </p>
+                    <p className="font-semibold capitalize">
+                      🕐 {booking.scheduledTime}
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Timeline */}
+              <div className="bg-white rounded-2xl shadow-lg p-6">
+                <h2 className="text-2xl font-bold text-gray-800 mb-4">
+                  📅 Timeline
+                </h2>
+                <div className="space-y-3">
+                  <div className="flex items-center space-x-3">
+                    <span className="w-2 h-2 bg-green-500 rounded-full"></span>
+                    <span className="text-gray-600">Booked:</span>
+                    <span className="font-semibold">
+                      {new Date(booking.timeline?.bookedAt || booking.createdAt).toLocaleString('en-IN')}
+                    </span>
+                  </div>
+                  {booking.timeline?.acceptedAt && (
+                    <div className="flex items-center space-x-3">
+                      <span className="w-2 h-2 bg-blue-500 rounded-full"></span>
+                      <span className="text-gray-600">Accepted:</span>
+                      <span className="font-semibold">
+                        {new Date(booking.timeline.acceptedAt).toLocaleString('en-IN')}
+                      </span>
+                    </div>
+                  )}
+                  {booking.timeline?.startedAt && (
+                    <div className="flex items-center space-x-3">
+                      <span className="w-2 h-2 bg-purple-500 rounded-full"></span>
+                      <span className="text-gray-600">Started:</span>
+                      <span className="font-semibold">
+                        {new Date(booking.timeline.startedAt).toLocaleString('en-IN')}
+                      </span>
+                    </div>
+                  )}
+                  {booking.timeline?.completedAt && (
+                    <div className="flex items-center space-x-3">
+                      <span className="w-2 h-2 bg-green-600 rounded-full"></span>
+                      <span className="text-gray-600">Completed:</span>
+                      <span className="font-semibold">
+                        {new Date(booking.timeline.completedAt).toLocaleString('en-IN')}
+                      </span>
+                    </div>
+                  )}
+                  {booking.timeline?.cancelledAt && (
+                    <div className="flex items-center space-x-3">
+                      <span className="w-2 h-2 bg-red-500 rounded-full"></span>
+                      <span className="text-gray-600">Cancelled:</span>
+                      <span className="font-semibold">
+                        {new Date(booking.timeline.cancelledAt).toLocaleString('en-IN')}
+                      </span>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            {/* Right Column - Actions & Pricing */}
+            <div className="space-y-6">
+              
+              {/* Pricing */}
+              <div className="bg-gradient-to-br from-green-50 to-blue-50 rounded-2xl shadow-lg p-6">
+                <h2 className="text-xl font-bold text-gray-800 mb-4">💰 Pricing</h2>
+                <div className="space-y-3">
+                  {booking.pricing?.estimatedCost && (
+                    <div>
+                      <p className="text-sm text-gray-600">Estimated Cost</p>
+                      <p className="font-bold text-lg">
+                        ₹{booking.pricing.estimatedCost.min} - ₹{booking.pricing.estimatedCost.max}
+                      </p>
+                    </div>
+                  )}
+                  {booking.pricing?.finalAmount && (
+                    <div className="pt-3 border-t border-gray-200">
+                      <p className="text-sm text-gray-600">Final Amount</p>
+                      <p className="font-bold text-2xl text-green-600">
+                        ₹{booking.pricing.finalAmount}
+                      </p>
+                    </div>
+                  )}
+                  <div>
+                    <p className="text-sm text-gray-600">Payment Method</p>
+                    <p className="font-semibold capitalize">{booking.payment?.method || 'Cash'}</p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-gray-600">Payment Status</p>
+                    <p className={`font-semibold capitalize ${
+                      booking.payment?.status === 'completed' ? 'text-green-600' : 'text-yellow-600'
+                    }`}>
+                      {booking.payment?.status || 'Pending'}
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Actions */}
+              {userType === 'worker' && (
+                <div className="bg-white rounded-2xl shadow-lg p-6">
+                  <h2 className="text-xl font-bold text-gray-800 mb-4">⚡ Actions</h2>
+                  <div className="space-y-3">
+                    
+                    {booking.status === 'pending' && (
+                      <>
+                        <button
+                          onClick={handleAccept}
+                          className="w-full px-6 py-3 bg-green-500 text-white rounded-lg font-semibold hover:bg-green-600 transition-colors"
+                        >
+                          ✅ Accept Booking
+                        </button>
+                        <button
+                          onClick={handleReject}
+                          className="w-full px-6 py-3 bg-red-500 text-white rounded-lg font-semibold hover:bg-red-600 transition-colors"
+                        >
+                          ❌ Reject Booking
+                        </button>
+                      </>
+                    )}
+
+                    {booking.status === 'accepted' && (
+                      <button
+                        onClick={handleStartService}
+                        className="w-full px-6 py-3 bg-blue-500 text-white rounded-lg font-semibold hover:bg-blue-600 transition-colors"
+                      >
+                        ⚡ Start Service
+                      </button>
+                    )}
+
+                    {booking.status === 'in-progress' && (
+                      <button
+                        onClick={handleComplete}
+                        className="w-full px-6 py-3 bg-purple-500 text-white rounded-lg font-semibold hover:bg-purple-600 transition-colors"
+                      >
+                        🎉 Complete Service
+                      </button>
+                    )}
+
+                    {['pending', 'accepted'].includes(booking.status) && (
+                      <button
+                        onClick={handleCancel}
+                        className="w-full px-6 py-3 border-2 border-red-300 text-red-600 rounded-lg font-semibold hover:bg-red-50 transition-colors"
+                      >
+                        🚫 Cancel Booking
+                      </button>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {/* Customer Actions */}
+              {userType === 'user' && (
+                <div className="bg-white rounded-2xl shadow-lg p-6">
+                  <h2 className="text-xl font-bold text-gray-800 mb-4">⚡ Actions</h2>
+                  <div className="space-y-3">
+                    {['pending', 'accepted'].includes(booking.status) && (
+                      <button
+                        onClick={handleCancel}
+                        className="w-full px-6 py-3 bg-red-500 text-white rounded-lg font-semibold hover:bg-red-600 transition-colors"
+                      >
+                        🚫 Cancel Booking
+                      </button>
+                    )}
+                    
+                    {booking.status === 'completed' && (
+                    <button
+                        onClick={() => navigate(`/review/${booking._id}`)}
+                        className="w-full px-6 py-3 bg-primary text-white rounded-lg font-semibold hover:bg-blue-600 transition-colors">
+                        ⭐ Write Review
+                    </button>
+                    )}
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <Footer />
+    </>
+  );
+}
+
+export default BookingDetails;
