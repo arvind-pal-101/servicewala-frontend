@@ -1,70 +1,396 @@
-# Getting Started with Create React App
+# ServiceWala Frontend
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+> **Full-stack service marketplace platform - React Frontend**
 
-## Available Scripts
+A modern, responsive React application for connecting customers with local service providers. Features real-time booking, payments, reviews, and an intuitive user interface.
 
-In the project directory, you can run:
+---
 
-### `npm start`
+## 🚀 **Live Demo**
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+- **Live URL:** https://servicewala-frontend-psi.vercel.app
+- **Backend API:** https://servicewala-backend-g4b8.onrender.com
+- **Status:** ✅ Production Ready
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+---
 
-### `npm test`
+## ✨ **Features**
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+### **For Customers:**
+- ✅ Browse and search service providers by category
+- ✅ View worker profiles with ratings and reviews
+- ✅ Book services with preferred date and time
+- ✅ Track booking status in real-time
+- ✅ Make payments (Razorpay + Cash on completion)
+- ✅ Write reviews and rate workers
+- ✅ Manage bookings from personal dashboard
 
-### `npm run build`
+### **For Workers:**
+- ✅ Professional profile with portfolio
+- ✅ Receive and manage booking requests
+- ✅ Accept/reject bookings
+- ✅ Update availability status
+- ✅ Upload profile and portfolio images
+- ✅ Track earnings and completed jobs
+- ✅ Confirm cash payments
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+### **For Admins:**
+- ✅ Comprehensive admin dashboard
+- ✅ Manage users and workers
+- ✅ Verify worker registrations
+- ✅ Monitor all bookings
+- ✅ Platform analytics
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+---
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+## 🛠️ **Tech Stack**
 
-### `npm run eject`
+- **Framework:** React 18
+- **Routing:** React Router DOM v6
+- **Styling:** Tailwind CSS
+- **HTTP Client:** Axios
+- **Notifications:** React Toastify
+- **Payment:** Razorpay SDK
+- **Image Upload:** Cloudinary
+- **Build Tool:** Create React App
+- **Deployment:** Vercel
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+---
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+## 📁 **Project Structure**
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+```
+frontend/
+├── public/
+│   ├── index.html
+│   ├── manifest.json
+│   └── favicon.ico
+├── src/
+│   ├── components/
+│   │   ├── Navbar.js
+│   │   ├── Footer.js
+│   │   ├── ProtectedRoute.js
+│   │   ├── ImageUpload.js
+│   │   └── Skeleton.js
+│   ├── pages/
+│   │   ├── Home.js
+│   │   ├── Search.js
+│   │   ├── WorkerProfile.js
+│   │   ├── BookingPage.js
+│   │   ├── Login.js
+│   │   ├── Register.js
+│   │   ├── WorkerLogin.js
+│   │   ├── WorkerRegister.js
+│   │   ├── UserDashboard.js
+│   │   ├── WorkerDashboard.js
+│   │   ├── WorkerImageManager.js
+│   │   ├── BookingDetails.js
+│   │   ├── PaymentPage.js
+│   │   ├── WriteReview.js
+│   │   ├── AdminLogin.js
+│   │   ├── AdminDashboard.js
+│   │   └── NotFound.js
+│   ├── services/
+│   │   └── api.js          # API integration
+│   ├── App.js
+│   ├── index.js
+│   └── index.css
+├── .env
+├── .gitignore
+├── package.json
+├── tailwind.config.js
+└── README.md
+```
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+---
 
-## Learn More
+## ⚙️ **Installation & Setup**
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+### **Prerequisites:**
+- Node.js (v17 or higher)
+- Backend API running (or deployed)
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+### **Step 1: Clone Repository**
+```bash
+git clone https://github.com/arvind-pal-101/servicewala-frontend.git
+cd servicewala-frontend
+```
 
-### Code Splitting
+### **Step 2: Install Dependencies**
+```bash
+npm install
+```
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
+### **Step 3: Environment Variables**
 
-### Analyzing the Bundle Size
+Create `.env` file in root directory:
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
+```env
+# Backend API URL
+REACT_APP_API_URL=http://localhost:5000/api
 
-### Making a Progressive Web App
+# For production deployment:
+# REACT_APP_API_URL=https://servicewala-backend-g4b8.onrender.com/api
+```
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
+### **Step 4: Run Development Server**
+```bash
+npm start
+```
 
-### Advanced Configuration
+Application will run on: `http://localhost:3000`
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
+---
 
-### Deployment
+## 🎨 **Pages & Routes**
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
+### **Public Routes:**
+- `/` - Home page
+- `/search` - Search workers
+- `/worker/:id` - Worker profile
+- `/login` - User login
+- `/register` - User registration
+- `/worker-login` - Worker login
+- `/worker-register` - Worker registration
+- `/admin-login` - Admin login
 
-### `npm run build` fails to minify
+### **Protected Routes (User):**
+- `/dashboard` - User dashboard
+- `/book/:workerId` - Create booking
+- `/booking/:id` - Booking details
+- `/payment/:bookingId` - Payment page
+- `/write-review/:bookingId` - Write review
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+### **Protected Routes (Worker):**
+- `/worker-dashboard` - Worker dashboard
+- `/worker-dashboard` (Images tab) - Image management
+
+### **Protected Routes (Admin):**
+- `/admin-dashboard` - Admin dashboard
+
+---
+
+## 🎯 **Key Features Implementation**
+
+### **1. Authentication**
+- JWT token stored in localStorage
+- Protected routes with ProtectedRoute component
+- Automatic token inclusion in API requests
+- Auto-redirect on unauthorized access
+
+### **2. Search & Filters**
+- Category-based filtering
+- Location-based search
+- Real-time search results
+- Worker availability status
+
+### **3. Booking System**
+- Multi-step booking form
+- Date and time selection
+- Problem description
+- Estimated cost calculation
+- Guest booking support
+
+### **4. Payment Integration**
+- Razorpay payment gateway
+- Cash on completion option
+- Payment status tracking
+- Worker cash confirmation
+
+### **5. Image Upload**
+- Profile image upload
+- Portfolio gallery (up to 5 images)
+- Cloudinary integration
+- Image preview before upload
+- Delete functionality
+
+### **6. Reviews & Ratings**
+- 5-star rating system
+- Written reviews
+- Average rating display
+- Rating distribution visualization
+
+---
+
+## 🎨 **UI/UX Features**
+
+- ✅ Fully responsive design
+- ✅ Mobile-first approach
+- ✅ Smooth animations
+- ✅ Loading skeletons
+- ✅ Toast notifications
+- ✅ Form validation
+- ✅ Error handling
+- ✅ 404 page
+- ✅ Professional color scheme
+- ✅ Intuitive navigation
+
+---
+
+## 🚀 **Deployment**
+
+### **Platform:** Vercel
+
+### **Environment Variables (Production):**
+
+In Vercel Dashboard → Settings → Environment Variables:
+
+```
+REACT_APP_API_URL=https://servicewala-backend-g4b8.onrender.com/api
+CI=false
+```
+
+### **Build Command:**
+```bash
+npm run build
+```
+
+### **Output Directory:**
+```
+build
+```
+
+### **Auto-Deploy:**
+Connected to GitHub for automatic deployments on push to main branch.
+
+---
+
+## 📝 **Scripts**
+
+```json
+{
+  "start": "react-scripts start",
+  "build": "react-scripts build",
+  "test": "react-scripts test",
+  "eject": "react-scripts eject"
+}
+```
+
+---
+
+## 🔌 **API Integration**
+
+All API calls are centralized in `src/services/api.js`:
+
+```javascript
+// Example: Login user
+const response = await authAPI.loginUser({ phone, password });
+
+// Example: Search workers
+const response = await workerAPI.search({ category, city });
+
+// Example: Create booking
+const response = await bookingAPI.create(bookingData);
+```
+
+---
+
+## 🎨 **Tailwind Configuration**
+
+Custom theme colors:
+
+```javascript
+{
+  primary: '#3B82F6',    // Blue-500
+  secondary: '#8B5CF6',  // Purple-500
+  success: '#10B981',    // Green-500
+  danger: '#EF4444',     // Red-500
+  warning: '#F59E0B'     // Amber-500
+}
+```
+
+---
+
+## 📱 **Responsive Breakpoints**
+
+```
+sm: 640px   // Mobile landscape
+md: 768px   // Tablet
+lg: 1024px  // Desktop
+xl: 1280px  // Large desktop
+2xl: 1536px // Extra large
+```
+
+---
+
+## 🐛 **Known Issues**
+
+- ESLint warnings in production build (disabled with CI=false)
+- Razorpay test mode only (production keys needed for live payments)
+
+---
+
+## 🔮 **Future Enhancements**
+
+- [ ] Real-time chat between users and workers
+- [ ] Push notifications
+- [ ] Progressive Web App (PWA)
+- [ ] Dark mode
+- [ ] Multi-language support
+- [ ] Google Maps integration
+- [ ] Worker calendar view
+- [ ] Advanced search filters
+- [ ] Favorites/wishlist
+- [ ] Referral system
+
+---
+
+## 🧪 **Testing Credentials**
+
+### **Test User:**
+```
+Phone: 9012345678
+Password: password123
+```
+
+### **Test Worker:**
+```
+Phone: 9345678901
+Password: password123
+```
+
+### **Test Admin:**
+```
+Username: admin
+Password: admin123
+```
+
+### **Test Payment (Razorpay):**
+```
+Card: 4111 1111 1111 1111
+CVV: 123
+Expiry: Any future date
+```
+
+---
+
+## 👨‍💻 **Developer**
+
+**Arvind Pal**
+- GitHub: [@arvind-pal-101](https://github.com/arvind-pal-101)
+- Location: Ayodhya, Uttar Pradesh, India
+
+---
+
+## 📄 **License**
+
+This project is private and not open for public use.
+
+---
+
+## 🙏 **Acknowledgments**
+
+- Vercel for frontend hosting
+- Tailwind CSS for styling framework
+- React team for the amazing framework
+- Razorpay for payment integration
+
+---
+
+## 📞 **Support**
+
+For issues or questions, please create an issue in the GitHub repository.
+
+---
+
+**⭐ If you found this project useful, please consider starring the repository!**
