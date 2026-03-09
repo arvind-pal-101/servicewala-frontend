@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
+import EmptyState from '../components/EmptyState';
+import ConfirmDialog from '../components/ConfirmDialog';
 import { bookingAPI, authAPI } from '../services/api';
 import { toast } from 'react-toastify';
 
@@ -11,6 +13,8 @@ function UserDashboard() {
   const [bookings, setBookings] = useState([]);
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [showCancelDialog, setShowCancelDialog] = useState(false);
+  const [selectedBookingId, setSelectedBookingId] = useState(null);
 
   useEffect(() => {
     checkAuth();
@@ -51,13 +55,14 @@ function UserDashboard() {
     }
   };
 
-  const handleCancelBooking = async (bookingId) => {
-    if (!window.confirm('Are you sure you want to cancel this booking?')) {
-      return;
-    }
+  const handleCancelBooking = (bookingId) => {
+    setSelectedBookingId(bookingId);
+    setShowCancelDialog(true);
+  };
 
+  const confirmCancelBooking = async () => {
     try {
-      await bookingAPI.cancelBooking(bookingId);
+      await bookingAPI.cancelBooking(selectedBookingId);
       toast.success('Booking cancelled');
       fetchBookings();
     } catch (error) {
@@ -133,7 +138,7 @@ function UserDashboard() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           
           {/* Header */}
-          <div className="mb-8">
+          <div className="mb-8 animate-fadeIn">
             <h1 className="text-4xl font-bold text-gray-800 mb-2">
               Welcome back, {user?.name || 'User'}! 👋
             </h1>
@@ -143,8 +148,7 @@ function UserDashboard() {
           {/* Stats Cards */}
           <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
             
-            {/* Total Bookings */}
-            <div className="bg-gradient-to-br from-blue-400 to-blue-600 rounded-2xl shadow-lg p-6 text-white">
+            <div className="bg-gradient-to-br from-blue-400 to-blue-600 rounded-2xl shadow-lg p-6 text-white animate-scalePop">
               <div className="flex items-center justify-between mb-2">
                 <span className="text-3xl">📋</span>
                 <span className="text-sm opacity-80">Total</span>
@@ -153,8 +157,7 @@ function UserDashboard() {
               <div className="text-sm opacity-90">All Bookings</div>
             </div>
 
-            {/* Upcoming */}
-            <div className="bg-gradient-to-br from-purple-400 to-purple-600 rounded-2xl shadow-lg p-6 text-white">
+            <div className="bg-gradient-to-br from-purple-400 to-purple-600 rounded-2xl shadow-lg p-6 text-white animate-scalePop" style={{ animationDelay: '0.1s' }}>
               <div className="flex items-center justify-between mb-2">
                 <span className="text-3xl">⏳</span>
                 <span className="text-sm opacity-80">Upcoming</span>
@@ -163,8 +166,7 @@ function UserDashboard() {
               <div className="text-sm opacity-90">Active Jobs</div>
             </div>
 
-            {/* Completed */}
-            <div className="bg-gradient-to-br from-green-400 to-green-600 rounded-2xl shadow-lg p-6 text-white">
+            <div className="bg-gradient-to-br from-green-400 to-green-600 rounded-2xl shadow-lg p-6 text-white animate-scalePop" style={{ animationDelay: '0.2s' }}>
               <div className="flex items-center justify-between mb-2">
                 <span className="text-3xl">🎉</span>
                 <span className="text-sm opacity-80">Completed</span>
@@ -173,8 +175,7 @@ function UserDashboard() {
               <div className="text-sm opacity-90">Finished Jobs</div>
             </div>
 
-            {/* Cancelled */}
-            <div className="bg-gradient-to-br from-red-400 to-red-600 rounded-2xl shadow-lg p-6 text-white">
+            <div className="bg-gradient-to-br from-red-400 to-red-600 rounded-2xl shadow-lg p-6 text-white animate-scalePop" style={{ animationDelay: '0.3s' }}>
               <div className="flex items-center justify-between mb-2">
                 <span className="text-3xl">🚫</span>
                 <span className="text-sm opacity-80">Cancelled</span>
@@ -188,7 +189,7 @@ function UserDashboard() {
           <div className="grid md:grid-cols-2 gap-6 mb-8">
             <button
               onClick={() => navigate('/search')}
-              className="bg-gradient-to-r from-primary to-blue-600 text-white rounded-2xl shadow-lg p-6 hover:shadow-xl transition-all transform hover:scale-105"
+              className="bg-gradient-to-r from-primary to-blue-600 text-white rounded-2xl shadow-lg p-6 hover:shadow-xl transition-all transform hover:scale-105 smooth-hover"
             >
               <div className="flex items-center justify-between">
                 <div className="text-left">
@@ -201,7 +202,7 @@ function UserDashboard() {
 
             <button
               onClick={() => toast.info('Favorites feature coming soon!')}
-              className="bg-gradient-to-r from-orange-400 to-red-500 text-white rounded-2xl shadow-lg p-6 hover:shadow-xl transition-all transform hover:scale-105"
+              className="bg-gradient-to-r from-orange-400 to-red-500 text-white rounded-2xl shadow-lg p-6 hover:shadow-xl transition-all transform hover:scale-105 smooth-hover"
             >
               <div className="flex items-center justify-between">
                 <div className="text-left">
@@ -265,35 +266,28 @@ function UserDashboard() {
             {/* Bookings List */}
             <div className="p-6">
               {filteredBookings.length === 0 ? (
-                <div className="text-center py-12">
-                  <div className="text-6xl mb-4">
-                    {activeTab === 'all' && '📭'}
-                    {activeTab === 'upcoming' && '⏳'}
-                    {activeTab === 'completed' && '🎉'}
-                    {activeTab === 'cancelled' && '🚫'}
-                  </div>
-                  <h3 className="text-2xl font-bold text-gray-800 mb-2">
-                    No {activeTab !== 'all' && activeTab} bookings
-                  </h3>
-                  <p className="text-gray-600 mb-6">
-                    {activeTab === 'all' && "You haven't made any bookings yet"}
-                    {activeTab === 'upcoming' && "No upcoming services scheduled"}
-                    {activeTab === 'completed' && "No completed services yet"}
-                    {activeTab === 'cancelled' && "No cancelled bookings"}
-                  </p>
-                  <button
-                    onClick={() => navigate('/search')}
-                    className="px-6 py-3 bg-primary text-white rounded-lg font-semibold hover:bg-blue-600 transition-colors"
-                  >
-                    🔍 Browse Workers
-                  </button>
-                </div>
+                <EmptyState
+                  icon={
+                    activeTab === 'all' ? '📭' :
+                    activeTab === 'upcoming' ? '⏳' :
+                    activeTab === 'completed' ? '🎉' :
+                    '🚫'
+                  }
+                  title={`No ${activeTab !== 'all' ? activeTab : ''} Bookings`}
+                  message={
+                    activeTab === 'all' 
+                      ? "You haven't made any bookings yet. Start by finding a worker!"
+                      : `No ${activeTab} bookings found.`
+                  }
+                  actionText="🔍 Browse Workers"
+                  actionLink="/search"
+                />
               ) : (
                 <div className="space-y-4">
                   {filteredBookings.map((booking) => (
                     <div
                       key={booking._id}
-                      className="border border-gray-200 rounded-xl p-6 hover:shadow-lg transition-shadow"
+                      className="border border-gray-200 rounded-xl p-6 hover:shadow-lg transition-shadow animate-fadeIn"
                     >
                       <div className="flex items-start justify-between mb-4">
                         <div className="flex-1">
@@ -333,7 +327,7 @@ function UserDashboard() {
                       <div className="flex flex-wrap gap-3">
                         <button
                           onClick={() => navigate(`/booking/${booking._id}`)}
-                          className="px-6 py-2 bg-primary text-white rounded-lg font-medium hover:bg-blue-600 transition-colors"
+                          className="px-6 py-2 bg-primary text-white rounded-lg font-medium hover:bg-blue-600 transition-colors btn-ripple"
                         >
                           👁️ View Details
                         </button>
@@ -341,20 +335,20 @@ function UserDashboard() {
                         {['pending', 'accepted'].includes(booking.status) && (
                           <button
                             onClick={() => handleCancelBooking(booking._id)}
-                            className="px-6 py-2 bg-red-500 text-white rounded-lg font-medium hover:bg-red-600 transition-colors"
+                            className="px-6 py-2 bg-red-500 text-white rounded-lg font-medium hover:bg-red-600 transition-colors btn-ripple"
                           >
                             🚫 Cancel Booking
                           </button>
                         )}
 
                         {booking.status === 'completed' && (
-                    <button
-                        onClick={() => navigate(`/review/${booking._id}`)}
-                        className="px-6 py-2 bg-yellow-500 text-white rounded-lg font-medium hover:bg-yellow-600 transition-colors"
-                        >
-                        ⭐ Write Review
-                    </button>
-                    )}
+                          <button
+                            onClick={() => navigate(`/review/${booking._id}`)}
+                            className="px-6 py-2 bg-yellow-500 text-white rounded-lg font-medium hover:bg-yellow-600 transition-colors btn-ripple"
+                          >
+                            ⭐ Write Review
+                          </button>
+                        )}
 
                         {booking.status === 'cancelled' && (
                           <button
@@ -374,7 +368,7 @@ function UserDashboard() {
 
           {/* Profile Section */}
           {user && (
-            <div className="mt-8 bg-white rounded-2xl shadow-lg p-6">
+            <div className="mt-8 bg-white rounded-2xl shadow-lg p-6 animate-fadeIn">
               <h2 className="text-2xl font-bold text-gray-800 mb-6">👤 Your Profile</h2>
               
               <div className="grid md:grid-cols-2 gap-6">
@@ -403,7 +397,7 @@ function UserDashboard() {
 
               <button
                 onClick={() => toast.info('Profile editing coming soon!')}
-                className="mt-6 w-full px-6 py-3 bg-primary text-white rounded-lg font-semibold hover:bg-blue-600 transition-colors"
+                className="mt-6 w-full px-6 py-3 bg-primary text-white rounded-lg font-semibold hover:bg-blue-600 transition-colors btn-ripple"
               >
                 ✏️ Edit Profile
               </button>
@@ -411,6 +405,18 @@ function UserDashboard() {
           )}
         </div>
       </div>
+
+      {/* Confirmation Dialog */}
+      <ConfirmDialog
+        isOpen={showCancelDialog}
+        onClose={() => setShowCancelDialog(false)}
+        onConfirm={confirmCancelBooking}
+        title="Cancel Booking?"
+        message="Are you sure you want to cancel this booking? This action cannot be undone."
+        confirmText="Yes, Cancel"
+        cancelText="No, Keep It"
+        type="danger"
+      />
 
       <Footer />
     </>

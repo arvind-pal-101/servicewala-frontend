@@ -4,6 +4,7 @@ import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import { bookingAPI, reviewAPI, authAPI } from '../services/api';
 import { toast } from 'react-toastify';
+import WorkerImageManager from './WorkerImageManager';
 
 function WorkerDashboard() {
   const navigate = useNavigate();
@@ -115,7 +116,7 @@ function WorkerDashboard() {
   const toggleAvailability = async () => {
     try {
       const newStatus = !worker?.availability?.isAvailable;
-      await authAPI.updateAvailability({ isAvailable: newStatus });
+      await authAPI.updateAvailability(newStatus);
       toast.success(newStatus ? 'You are now available!' : 'Marked as unavailable');
       fetchWorkerData();
     } catch (error) {
@@ -258,6 +259,16 @@ function WorkerDashboard() {
                   📅 Bookings ({bookings.length})
                 </button>
                 <button
+                  onClick={() => setActiveTab('images')}
+                  className={`flex-1 px-6 py-4 font-semibold transition-colors ${
+                    activeTab === 'images'
+                      ? 'bg-primary text-white'
+                      : 'text-gray-600 hover:bg-gray-50'
+                  }`}
+                >
+                  📸 Images
+                </button>
+                <button
                   onClick={() => setActiveTab('profile')}
                   className={`flex-1 px-6 py-4 font-semibold transition-colors ${
                     activeTab === 'profile'
@@ -369,6 +380,9 @@ function WorkerDashboard() {
                 </div>
               )}
 
+              {/* Images Tab */}
+              {activeTab === 'images' && <WorkerImageManager />}
+
               {/* Profile Tab */}
               {activeTab === 'profile' && worker && (
                 <div>
@@ -380,9 +394,9 @@ function WorkerDashboard() {
                       {/* Profile Picture */}
                       <div className="flex items-center space-x-6">
                         <img
-                          src={worker.profilePic || 'https://via.placeholder.com/150'}
+                          src={worker.profileImage?.url || worker.profilePic || 'https://via.placeholder.com/150'}
                           alt={worker.name}
-                          className="w-24 h-24 rounded-full border-4 border-primary"
+                          className="w-24 h-24 rounded-full border-4 border-primary object-cover"
                         />
                         <div>
                           <h4 className="text-xl font-bold text-gray-800">{worker.name}</h4>

@@ -14,6 +14,7 @@ function BookingDetails() {
 
   useEffect(() => {
     fetchBooking();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id]);
 
   const fetchBooking = async () => {
@@ -71,6 +72,21 @@ function BookingDetails() {
       toast.error('Failed to complete service');
     }
   };
+  const handleConfirmCash = async () => {
+  const confirm = window.confirm(
+    `Confirm that you received ₹${booking.pricing?.finalAmount} in CASH from the customer?`
+  );
+  
+  if (!confirm) return;
+
+  try {
+    await bookingAPI.confirmCashPayment(id);
+    toast.success('💵 Cash payment confirmed!');
+    fetchBooking();
+  } catch (error) {
+    toast.error('Failed to confirm cash payment');
+  }
+};
 
   const handleCancel = async () => {
     const reason = prompt('Reason for cancellation:');
@@ -358,7 +374,7 @@ function BookingDetails() {
                 </div>
               </div>
 
-              {/* Actions */}
+              {/* Actions - WORKER */}
               {userType === 'worker' && (
                 <div className="bg-white rounded-2xl shadow-lg p-6">
                   <h2 className="text-xl font-bold text-gray-800 mb-4">⚡ Actions</h2>
@@ -398,6 +414,16 @@ function BookingDetails() {
                         🎉 Complete Service
                       </button>
                     )}
+                    {/* CONFIRM CASH PAYMENT - For completed bookings with pending payment */}
+{booking.status === 'completed' && 
+ booking.payment?.status === 'pending' && (
+  <button
+    onClick={handleConfirmCash}
+    className="w-full px-6 py-3 bg-gradient-to-r from-green-500 to-green-600 text-white rounded-lg font-semibold hover:shadow-xl transition-all transform hover:scale-105"
+  >
+    💵 Confirm Cash Received - ₹{booking.pricing?.finalAmount}
+  </button>
+)}
 
                     {['pending', 'accepted'].includes(booking.status) && (
                       <button
@@ -411,30 +437,64 @@ function BookingDetails() {
                 </div>
               )}
 
-              {/* Customer Actions */}
-              {userType === 'user' && (
-                <div className="bg-white rounded-2xl shadow-lg p-6">
-                  <h2 className="text-xl font-bold text-gray-800 mb-4">⚡ Actions</h2>
-                  <div className="space-y-3">
-                    {['pending', 'accepted'].includes(booking.status) && (
-                      <button
-                        onClick={handleCancel}
-                        className="w-full px-6 py-3 bg-red-500 text-white rounded-lg font-semibold hover:bg-red-600 transition-colors"
-                      >
-                        🚫 Cancel Booking
-                      </button>
-                    )}
-                    
-                    {booking.status === 'completed' && (
-                    <button
-                        onClick={() => navigate(`/review/${booking._id}`)}
-                        className="w-full px-6 py-3 bg-primary text-white rounded-lg font-semibold hover:bg-blue-600 transition-colors">
-                        ⭐ Write Review
-                    </button>
-                    )}
-                  </div>
-                </div>
-              )}
+              {/* Actions - CUSTOMER */}
+{userType === 'user' && (
+  <div className="bg-white rounded-2xl shadow-lg p-6">
+    <h2 className="text-xl font-bold text-gray-800 mb-4">⚡ Actions</h2>
+    <div className="space-y-3">
+      
+      {/* PAY NOW BUTTON - Shows for accepted/in-progress/completed if not paid */}
+      {['accepted', 'in-progress', 'completed'].includes(booking.status) && 
+       booking.payment?.status === 'pending' && (
+        <button
+          onClick={() => navigate(`/payment/${booking._id}?amount=${booking.pricing?.finalAmount || booking.pricing?.estimatedCost?.max || 500}`)}
+          className="w-full px-6 py-3 bg-gradient-to-r from-green-500 to-green-600 text-white rounded-lg font-semibold hover:shadow-xl transition-all transform hover:scale-105"
+        >
+          💳 Pay Now - ₹{booking.pricing?.finalAmount || booking.pricing?.estimatedCost?.max || 500}
+        </button>
+      )}
+
+      {/* PAYMENT COMPLETED - Shows when paid */}
+      {booking.payment?.status === 'completed' && (
+        <div className="w-full px-6 py-3 bg-green-100 text-green-800 rounded-lg font-semibold flex items-center justify-center space-x-2">
+          <span>✅</span>
+          <span>Payment Completed</span>
+        </div>
+      )}
+
+      {/* CASH PAYMENT NOTE - For completed bookings with pending payment */}
+      {booking.status === 'completed' && 
+       booking.payment?.status === 'pending' && (
+        <div className="w-full px-6 py-3 bg-yellow-50 border-2 border-yellow-300 rounded-lg">
+          <p className="text-yellow-800 font-semibold text-center mb-1">💵 Payment Pending</p>
+          <p className="text-yellow-700 text-sm text-center">
+            Pay online above or pay ₹{booking.pricing?.finalAmount} cash to worker
+          </p>
+        </div>
+      )}
+
+      {/* CANCEL BUTTON */}
+      {['pending', 'accepted'].includes(booking.status) && (
+        <button
+          onClick={handleCancel}
+          className="w-full px-6 py-3 bg-red-500 text-white rounded-lg font-semibold hover:bg-red-600 transition-colors"
+        >
+          🚫 Cancel Booking
+        </button>
+      )}
+      
+      {/* REVIEW BUTTON */}
+      {booking.status === 'completed' && (
+        <button
+          onClick={() => navigate(`/review/${booking._id}`)}
+          className="w-full px-6 py-3 bg-primary text-white rounded-lg font-semibold hover:bg-blue-600 transition-colors"
+        >
+          ⭐ Write Review
+        </button>
+      )}
+    </div>
+  </div>
+)}
             </div>
           </div>
         </div>

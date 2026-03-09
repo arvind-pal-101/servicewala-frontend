@@ -17,6 +17,12 @@ import UserDashboard from './pages/UserDashboard';
 import AdminLogin from './pages/AdminLogin';
 import AdminDashboard from './pages/AdminDashboard';
 import WriteReview from './pages/WriteReview';
+import NotFound from './pages/NotFound';
+import PaymentPage from './pages/PaymentPage';
+import PaymentSuccess from './pages/PaymentSuccess';
+import PaymentFailed from './pages/PaymentFailed';
+
+
 
 
 function App() {
@@ -37,7 +43,11 @@ function App() {
           <Route path="/dashboard" element={<UserDashboard />} />
           <Route path="/admin/login" element={<AdminLogin />} />
           <Route path="/admin/dashboard" element={<AdminDashboard />} />
-          <Route path="/review/:bookingId" element={<WriteReview />} /> 
+          <Route path="/review/:bookingId" element={<WriteReview />} />
+          <Route path="/payment/:bookingId" element={<PaymentPage />} />
+          <Route path="/payment-success" element={<PaymentSuccess />} />
+          <Route path="/payment-failed" element={<PaymentFailed />} />          
+          <Route path="*" element={<NotFound />} /> 
         </Routes>
         
         <ToastContainer

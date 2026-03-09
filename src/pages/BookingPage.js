@@ -107,67 +107,71 @@ function BookingPage() {
   };
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
+  e.preventDefault();
 
-    if (!validateForm()) {
-      return;
-    }
+  if (!validateForm()) {
+    return;
+  }
 
-    try {
-      setSubmitting(true);
+  try {
+    setSubmitting(true);
 
-      const bookingData = {
-        worker: workerId,
-        category: worker.category?._id,
-        serviceDetails: {
-          problemDescription: formData.problemDescription,
-          serviceAddress: {
-            address: formData.serviceAddress,
-            city: formData.serviceCity,
-            pincode: formData.servicePincode,
-            coordinates: {
-              latitude: worker.location?.coordinates?.latitude || 26.7922,
-              longitude: worker.location?.coordinates?.longitude || 82.1998
-            }
-          },
-          additionalNotes: formData.additionalNotes
+    const bookingData = {
+      workerId: workerId,  // ← FIXED: was 'worker'
+      categoryId: worker.category?._id,  // ← FIXED: was 'category'
+      serviceDetails: {
+        problemDescription: formData.problemDescription,
+        serviceAddress: {
+          address: formData.serviceAddress,
+          city: formData.serviceCity,
+          pincode: formData.servicePincode
         },
-        scheduledDate: formData.scheduledDate,
-        scheduledTime: formData.scheduledTime
+        additionalNotes: formData.additionalNotes
+      },
+      scheduledDate: formData.scheduledDate,
+      scheduledTime: formData.scheduledTime
+    };
+
+    // For guest users, add contact info
+    if (!isLoggedIn) {
+      bookingData.guestCustomer = {  // ← FIXED: matches backend
+        name: formData.customerName,
+        phone: formData.customerPhone,
+        email: formData.customerEmail || ''
       };
-
-      // For guest users, add contact info
-      if (!isLoggedIn) {
-        bookingData.guestCustomer = {
-          name: formData.customerName,
-          phone: formData.customerPhone,
-          email: formData.customerEmail
-        };
-      }
-
-      const response = await bookingAPI.create(bookingData);
-
-      if (response.data.success) {
-        toast.success('🎉 Booking confirmed! Worker will contact you soon.');
-        
-        // Show booking details
-        const bookingId = response.data.data._id;
-        
-        // Redirect based on login status
-        if (isLoggedIn) {
-          navigate('/dashboard');
-        } else {
-          // Guest user - show confirmation
-          navigate(`/booking-success?id=${bookingId}&phone=${formData.customerPhone}`);
-        }
-      }
-    } catch (error) {
-      console.error('Booking error:', error);
-      toast.error(error.response?.data?.message || 'Failed to create booking');
-    } finally {
-      setSubmitting(false);
     }
-  };
+
+    console.log('Submitting booking:', bookingData);
+
+    const response = await bookingAPI.create(bookingData);
+
+    if (response.data.success) {
+      toast.success('🎉 Booking confirmed! Worker will contact you soon.');
+      
+      // Redirect based on login status
+      if (isLoggedIn) {
+        navigate('/dashboard');
+      } else {
+        navigate('/booking-success');
+      }
+    }
+  } catch (error) {
+    console.error('Booking error:', error);
+    
+    // Show specific error message
+    const errorMessage = error.response?.data?.message || 'Failed to create booking';
+    toast.error(errorMessage);
+    
+    // If worker unavailable, redirect back
+    if (errorMessage.includes('unavailable')) {
+      setTimeout(() => {
+        navigate(`/worker/${workerId}`);
+      }, 2000);
+    }
+  } finally {
+    setSubmitting(false);
+  }
+};
 
   // Calculate estimated cost
   const estimatedHours = 2; // Default estimate

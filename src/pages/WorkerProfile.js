@@ -98,7 +98,14 @@ function WorkerProfile() {
               
               {/* Worker Photo */}
               <div className="md:w-1/3 bg-gradient-to-br from-blue-100 to-purple-100 relative">
-                {worker.profilePic && worker.profilePic !== 'https://via.placeholder.com/150' ? (
+                {/* Profile Image - UPDATED SECTION */}
+                {worker.profileImage?.url ? (
+                  <img 
+                    src={worker.profileImage.url} 
+                    alt={worker.name}
+                    className="w-full h-full object-cover"
+                  />
+                ) : worker.profilePic && worker.profilePic !== 'https://via.placeholder.com/150' ? (
                   <img 
                     src={worker.profilePic} 
                     alt={worker.name}
@@ -115,13 +122,6 @@ function WorkerProfile() {
                   <div className="absolute top-4 right-4 bg-success text-white px-4 py-2 rounded-full font-semibold flex items-center space-x-2 shadow-lg">
                     <span className="text-xl">✓</span>
                     <span>Verified</span>
-                  </div>
-                )}
-
-                {/* Availability Badge */}
-                {worker.availability?.isAvailable && (
-                  <div className="absolute top-4 left-4 bg-green-500 text-white px-4 py-2 rounded-full font-semibold shadow-lg">
-                    🟢 Available Now
                   </div>
                 )}
               </div>
@@ -196,6 +196,21 @@ function WorkerProfile() {
                   </div>
                 </div>
 
+                {/* Availability Status */}
+                <div className="mb-4">
+                  {worker.availability?.isAvailable ? (
+                    <div className="flex items-center justify-center space-x-2 px-4 py-3 bg-green-100 text-green-800 rounded-lg font-semibold">
+                      <span className="w-3 h-3 bg-green-500 rounded-full animate-pulse"></span>
+                      <span>🟢 Available for Booking</span>
+                    </div>
+                  ) : (
+                    <div className="flex items-center justify-center space-x-2 px-4 py-3 bg-red-100 text-red-800 rounded-lg font-semibold">
+                      <span className="w-3 h-3 bg-red-500 rounded-full"></span>
+                      <span>🔴 Currently Unavailable</span>
+                    </div>
+                  )}
+                </div>
+
                 {/* Action Buttons */}
                 <div className="grid grid-cols-2 gap-4">
                   <button
@@ -205,13 +220,29 @@ function WorkerProfile() {
                     <span className="text-2xl">📞</span>
                     <span>Call Now</span>
                   </button>
-                  <button
-                    onClick={handleBookNow}
-                    className="px-6 py-4 bg-gradient-to-r from-primary to-blue-600 text-white rounded-xl font-semibold text-lg hover:shadow-2xl transform hover:scale-105 transition-all flex items-center justify-center space-x-2"
-                  >
-                    <span className="text-2xl">📅</span>
-                    <span>Book Now</span>
-                  </button>
+                  
+                  {worker.availability?.isAvailable ? (
+                    <button
+                      onClick={handleBookNow}
+                      className="px-6 py-4 bg-gradient-to-r from-primary to-blue-600 text-white rounded-xl font-semibold text-lg hover:shadow-2xl transform hover:scale-105 transition-all flex items-center justify-center space-x-2"
+                    >
+                      <span className="text-2xl">📅</span>
+                      <span>Book Now</span>
+                    </button>
+                  ) : (
+                    <div>
+                      <button
+                        disabled
+                        className="w-full px-6 py-4 bg-gray-300 text-gray-500 rounded-xl font-semibold text-lg cursor-not-allowed flex items-center justify-center space-x-2"
+                      >
+                        <span className="text-2xl">🔴</span>
+                        <span>Unavailable</span>
+                      </button>
+                      <p className="text-center text-xs text-gray-600 mt-2">
+                        Worker not accepting bookings
+                      </p>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
@@ -248,29 +279,29 @@ function WorkerProfile() {
             </div>
           )}
 
-          {/* Portfolio */}
+          {/* Portfolio Gallery - UPDATED SECTION */}
           {worker.portfolio && worker.portfolio.length > 0 && (
             <div className="bg-white rounded-2xl shadow-lg p-8 mb-8">
               <h2 className="text-2xl font-bold text-gray-800 mb-6 flex items-center space-x-2">
-                <span>🖼️</span>
+                <span>📸</span>
                 <span>Portfolio</span>
               </h2>
-              <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                {worker.portfolio.map((photo, index) => (
-                  <div key={index} className="relative group rounded-xl overflow-hidden shadow-md hover:shadow-xl transition-shadow">
-                    <img 
-                      src={typeof photo === 'string' ? photo : photo.url} 
-                      alt={typeof photo === 'object' && photo.title ? photo.title : `Work ${index + 1}`}
-                      className="w-full h-64 object-cover group-hover:scale-110 transition-transform duration-300"
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                {worker.portfolio.map((image, index) => (
+                  <div key={image.publicId || index} className="relative group">
+                    <img
+                      src={image.url || (typeof image === 'string' ? image : '')}
+                      alt={`Portfolio ${index + 1}`}
+                      className="w-full h-40 object-cover rounded-lg border-2 border-gray-300 cursor-pointer hover:border-blue-500 transition-all"
+                      onClick={() => window.open(image.url || image, '_blank')}
                     />
-                    {typeof photo === 'object' && photo.title && (
-                      <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black to-transparent p-4">
-                        <p className="text-white font-medium">{photo.title}</p>
-                      </div>
-                    )}
+                    <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 rounded-lg transition-all pointer-events-none"></div>
                   </div>
                 ))}
               </div>
+              <p className="text-sm text-gray-500 mt-4">
+                Click on any image to view full size
+              </p>
             </div>
           )}
 
@@ -389,7 +420,7 @@ function WorkerProfile() {
                           ))}
                         </div>
                       </div>
-
+                      
                       {/* Review Text */}
                       <p className="text-gray-700 leading-relaxed">
                         {review.comment || review.reviewText}
