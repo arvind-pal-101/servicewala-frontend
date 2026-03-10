@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
-import { workerAPI, reviewAPI } from '../services/api';
+import { workerAPI, reviewAPI, authAPI } from '../services/api';
 import { toast } from 'react-toastify';
 
 function WorkerProfile() {
@@ -11,10 +11,13 @@ function WorkerProfile() {
   const [worker, setWorker] = useState(null);
   const [reviews, setReviews] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [isFavorite, setIsFavorite] = useState(false);  // ← ADD THIS
+  const [favLoading, setFavLoading] = useState(false);
 
   useEffect(() => {
     fetchWorkerDetails();
     fetchReviews();
+    checkIfFavorite();
   }, [id]);
 
   const fetchWorkerDetails = async () => {
@@ -44,10 +47,60 @@ function WorkerProfile() {
   };
 
   const handleCall = () => {
-    if (worker?.phone) {
-      window.location.href = `tel:${worker.phone}`;
+  if (worker?.phone) {
+    window.location.href = `tel:${worker.phone}`;
+  }
+};
+
+// ADD THESE 2 FUNCTIONS HERE:
+const checkIfFavorite = async () => {
+  const token = localStorage.getItem('token');
+  const userType = localStorage.getItem('userType');
+  
+  if (!token || userType !== 'user') return;
+  
+  try {
+    const response = await authAPI.getFavorites();
+    const favorites = response.data.data;
+    setIsFavorite(favorites.some(fav => fav._id === id));
+  } catch (error) {
+    console.error('Error checking favorites:', error);
+  }
+};
+
+const toggleFavorite = async () => {
+  const token = localStorage.getItem('token');
+  const userType = localStorage.getItem('userType');
+  
+  if (!token) {
+    toast.error('Please login to add favorites');
+    navigate('/login');
+    return;
+  }
+  
+  if (userType !== 'user') {
+    toast.info('Only customers can add favorites');
+    return;
+  }
+  
+  try {
+    setFavLoading(true);
+    
+    if (isFavorite) {
+      await authAPI.removeFavorite(id);
+      setIsFavorite(false);
+      toast.success('Removed from favorites');
+    } else {
+      await authAPI.addFavorite(id);
+      setIsFavorite(true);
+      toast.success('Added to favorites! ⭐');
     }
-  };
+  } catch (error) {
+    toast.error('Failed to update favorites');
+  } finally {
+    setFavLoading(false);
+  }
+};
 
   if (loading) {
     return (
@@ -212,38 +265,55 @@ function WorkerProfile() {
                 </div>
 
                 {/* Action Buttons */}
-                <div className="grid grid-cols-2 gap-4">
-                  <button
-                    onClick={handleCall}
-                    className="px-6 py-4 border-2 border-primary text-primary rounded-xl font-semibold text-lg hover:bg-primary hover:text-white transition-all flex items-center justify-center space-x-2"
-                  >
-                    <span className="text-2xl">📞</span>
-                    <span>Call Now</span>
-                  </button>
-                  
-                  {worker.availability?.isAvailable ? (
-                    <button
-                      onClick={handleBookNow}
-                      className="px-6 py-4 bg-gradient-to-r from-primary to-blue-600 text-white rounded-xl font-semibold text-lg hover:shadow-2xl transform hover:scale-105 transition-all flex items-center justify-center space-x-2"
-                    >
-                      <span className="text-2xl">📅</span>
-                      <span>Book Now</span>
-                    </button>
-                  ) : (
-                    <div>
-                      <button
-                        disabled
-                        className="w-full px-6 py-4 bg-gray-300 text-gray-500 rounded-xl font-semibold text-lg cursor-not-allowed flex items-center justify-center space-x-2"
-                      >
-                        <span className="text-2xl">🔴</span>
-                        <span>Unavailable</span>
-                      </button>
-                      <p className="text-center text-xs text-gray-600 mt-2">
-                        Worker not accepting bookings
-                      </p>
-                    </div>
-                  )}
-                </div>
+                {/* Action Buttons */}
+<div className="grid grid-cols-3 gap-4">
+  {/* FAVORITE BUTTON - NEW! */}
+  <button
+    onClick={toggleFavorite}
+    disabled={favLoading}
+    className={`px-6 py-4 border-2 rounded-xl font-semibold text-lg transition-all flex items-center justify-center space-x-2 ${
+      isFavorite
+        ? 'border-red-500 text-red-500 bg-red-50 hover:bg-red-100'
+        : 'border-gray-300 text-gray-600 hover:border-primary hover:text-primary'
+    } ${favLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
+  >
+    <span className="text-2xl">{isFavorite ? '❤️' : '🤍'}</span>
+    <span>{isFavorite ? 'Saved' : 'Save'}</span>
+  </button>
+  
+  {/* CALL BUTTON */}
+  <button
+    onClick={handleCall}
+    className="px-6 py-4 border-2 border-primary text-primary rounded-xl font-semibold text-lg hover:bg-primary hover:text-white transition-all flex items-center justify-center space-x-2"
+  >
+    <span className="text-2xl">📞</span>
+    <span>Call</span>
+  </button>
+  
+  {/* BOOK NOW BUTTON */}
+  {worker.availability?.isAvailable ? (
+    <button
+      onClick={handleBookNow}
+      className="px-6 py-4 bg-gradient-to-r from-primary to-blue-600 text-white rounded-xl font-semibold text-lg hover:shadow-2xl transform hover:scale-105 transition-all flex items-center justify-center space-x-2"
+    >
+      <span className="text-2xl">📅</span>
+      <span>Book</span>
+    </button>
+  ) : (
+    <div>
+      <button
+        disabled
+        className="w-full px-6 py-4 bg-gray-300 text-gray-500 rounded-xl font-semibold text-lg cursor-not-allowed flex items-center justify-center space-x-2"
+      >
+        <span className="text-2xl">🔴</span>
+        <span>Unavailable</span>
+      </button>
+      <p className="text-center text-xs text-gray-600 mt-2">
+        Worker not accepting bookings
+      </p>
+    </div>
+  )}
+</div>
               </div>
             </div>
           </div>

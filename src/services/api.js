@@ -31,7 +31,12 @@ export const authAPI = {
   registerWorker: (data) => api.post('/auth/worker/register', data),
   loginWorker: (data) => api.post('/auth/worker/login', data),
   getProfile: () => api.get('/auth/profile'),                         // ← Now matches!
-  updateAvailability: (status) => api.put('/auth/worker/availability', { isAvailable: status })
+  updateAvailability: (status) => api.put('/auth/worker/availability', { isAvailable: status }),
+
+   // Favorite workers - ADD THESE 3 LINES
+  addFavorite: (workerId) => api.post(`/auth/favorites/${workerId}`),
+  removeFavorite: (workerId) => api.delete(`/auth/favorites/${workerId}`),
+  getFavorites: () => api.get('/auth/favorites')
 };
 
 // Category APIs
