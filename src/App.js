@@ -10,6 +10,8 @@ import BookingPage from './pages/BookingPage';
 import BookingSuccess from './pages/BookingSuccess';
 import Login from './pages/Login';
 import Register from './pages/Register';
+import ForgotPassword from './pages/ForgotPassword';
+import ResetPassword from './pages/ResetPassword';
 import WorkerRegister from './pages/WorkerRegister';
 import WorkerDashboard from './pages/WorkerDashboard';
 import BookingDetails from './pages/BookingDetails';
@@ -37,6 +39,8 @@ function App() {
           <Route path="/booking-success" element={<BookingSuccess />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
+          <Route path="/reset-password/:token" element={<ResetPassword />} />
           <Route path="/worker/register" element={<WorkerRegister />} />
           <Route path="/worker/dashboard" element={<WorkerDashboard />} />
           <Route path="/booking/:id" element={<BookingDetails />} />

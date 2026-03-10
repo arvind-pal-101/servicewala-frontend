@@ -36,7 +36,9 @@ export const authAPI = {
    // Favorite workers - ADD THESE 3 LINES
   addFavorite: (workerId) => api.post(`/auth/favorites/${workerId}`),
   removeFavorite: (workerId) => api.delete(`/auth/favorites/${workerId}`),
-  getFavorites: () => api.get('/auth/favorites')
+  getFavorites: () => api.get('/auth/favorites'),
+  forgotPassword: (data) => api.post('/auth/forgot-password', data),
+  resetPassword: (token, data) => api.put(`/auth/reset-password/${token}`, data)
 };
 
 // Category APIs
