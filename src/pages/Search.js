@@ -6,6 +6,8 @@ import WorkerCard from '../components/WorkerCard';
 import { workerAPI, categoryAPI } from '../services/api';
 import { CardSkeleton } from '../components/LoadingSkeleton';
 import { toast } from 'react-toastify';
+import { Helmet } from 'react-helmet-async';
+
 
 function Search() {
   const navigate = useNavigate();
@@ -200,6 +202,10 @@ function Search() {
               </button>
             </div>
           </div>
+          <Helmet>
+  <title>Find Service Providers - ServiceWala</title>
+  <meta name="description" content="Search and find verified local service providers. Browse categories and book trusted professionals for your needs." />
+</Helmet>
 
           {/* Results */}
           <div className="mb-4 flex items-center justify-between">

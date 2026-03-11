@@ -117,12 +117,15 @@ function Footer() {
               © {currentYear} ServiceWala. All rights reserved.
             </p>
             <div className="flex space-x-6 text-sm">
-              <Link to="/privacy" className="hover:text-primary transition-colors">
-                Privacy Policy
-              </Link>
-              <Link to="/terms" className="hover:text-primary transition-colors">
-                Terms of Service
-              </Link>
+              <Link to="/terms" className="hover:text-white transition-colors">
+  Terms of Service
+</Link>
+<Link to="/privacy" className="hover:text-white transition-colors">
+  Privacy Policy
+</Link>
+<Link to="/refund-policy" className="hover:text-white transition-colors">
+  Refund Policy
+</Link>
               <Link to="/contact" className="hover:text-primary transition-colors">
                 Contact
               </Link>

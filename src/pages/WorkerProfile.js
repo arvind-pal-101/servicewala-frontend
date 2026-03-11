@@ -4,6 +4,8 @@ import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import { workerAPI, reviewAPI, authAPI } from '../services/api';
 import { toast } from 'react-toastify';
+import { Helmet } from 'react-helmet-async';
+
 
 function WorkerProfile() {
   const { id } = useParams();
@@ -215,6 +217,12 @@ const toggleFavorite = async () => {
                       {worker.experience || 0} years
                     </p>
                   </div>
+                  {worker && (
+  <Helmet>
+    <title>{worker.name} - {worker.category?.name} | ServiceWala</title>
+    <meta name="description" content={`Book ${worker.name}, a verified ${worker.category?.name} in ${worker.location?.city}. ${worker.experience} years experience. Rating: ${worker.ratings?.average || 0}/5`} />
+  </Helmet>
+)}
 
                   <div className="bg-green-50 rounded-xl p-4">
                     <div className="flex items-center space-x-2 mb-2">

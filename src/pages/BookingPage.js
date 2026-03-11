@@ -4,6 +4,8 @@ import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import { workerAPI, bookingAPI } from '../services/api';
 import { toast } from 'react-toastify';
+import { trackBooking } from '../utils/analytics';
+
 
 function BookingPage() {
   const { workerId } = useParams();
@@ -148,6 +150,7 @@ function BookingPage() {
     if (response.data.success) {
       toast.success('🎉 Booking confirmed! Worker will contact you soon.');
       
+      trackBooking(worker.category?.name || 'Unknown Category');
       // Redirect based on login status
       if (isLoggedIn) {
         navigate('/dashboard');

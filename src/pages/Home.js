@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { categoryAPI } from '../services/api';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
+import { Helmet } from 'react-helmet-async';
 
 function Home() {
   const [categories, setCategories] = useState([]);
@@ -28,6 +29,14 @@ function Home() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-orange-50">
+
+    <Helmet>
+      <title>ServiceWala - Find Local Service Providers in Ayodhya</title>
+      <meta name="description" content="Connect with verified plumbers, electricians, carpenters, and home service professionals in Ayodhya. Book trusted workers at affordable rates." />
+      <meta name="keywords" content="home services Ayodhya, plumber Ayodhya, electrician Ayodhya, carpenter, local workers" />
+      <link rel="canonical" href="https://servicewala.com/" />
+    </Helmet>
+
       <Navbar />
       {/* Hero Section - Modern & Eye-Catching */}
       <section className="relative overflow-hidden">

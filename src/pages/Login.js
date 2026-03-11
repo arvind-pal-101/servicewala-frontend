@@ -4,6 +4,8 @@ import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import { authAPI } from '../services/api';
 import { toast } from 'react-toastify';
+import { trackLogin } from '../utils/analytics';
+
 
 function Login() {
   const navigate = useNavigate();
@@ -44,6 +46,7 @@ function Login() {
       const response = await loginAPI(formData);
 
       if (response.data.success) {
+          trackLogin(userType); // Track login
         // Save token and user type
         localStorage.setItem('token', response.data.data.token);
         localStorage.setItem('userType', userType);
