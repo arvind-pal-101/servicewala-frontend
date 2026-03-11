@@ -29,6 +29,11 @@ import PaymentFailed from './pages/PaymentFailed';
 import TermsOfService from './pages/TermsOfService';
 import PrivacyPolicy from './pages/PrivacyPolicy';
 import RefundPolicy from './pages/RefundPolicy';
+import About from './pages/About';
+import HowItWorks from './pages/HowItWorks';
+import FAQ from './pages/FAQ';
+import Services from './pages/Services';
+import Contact from './pages/Contact';
 
 // Analytics wrapper component - INSIDE Router
 function AnalyticsWrapper({ children }) {
@@ -75,6 +80,11 @@ function App() {
               <Route path="/privacy" element={<PrivacyPolicy />} />
               <Route path="/refund-policy" element={<RefundPolicy />} />         
               <Route path="*" element={<NotFound />} /> 
+              <Route path="/about" element={<About />} />
+              <Route path="/how-it-works" element={<HowItWorks />} />
+              <Route path="/faq" element={<FAQ />} />
+              <Route path="/services" element={<Services />} />
+              <Route path="/contact" element={<Contact />} />
             </Routes>
             
             {/* Cookie Consent */}

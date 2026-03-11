@@ -71,7 +71,7 @@ function Footer() {
                 </Link>
               </li>
               <li>
-                <Link to="/worker/login" className="hover:text-primary transition-colors">
+                <Link to="/login" className="hover:text-primary transition-colors">
                   Worker Login
                 </Link>
               </li>
