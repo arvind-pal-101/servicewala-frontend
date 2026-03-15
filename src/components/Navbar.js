@@ -1,10 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { authAPI } from '../services/api';
 
+const PUBLIC_PATHS = ['/', '/login', '/register', '/worker/register', '/admin/login', '/forgot-password', '/reset-password', '/about', '/services', '/contact', '/faq', '/terms', '/privacy', '/refund-policy', '/search'];
+
 function Navbar() {
   const navigate = useNavigate();
+  const location = useLocation();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -17,27 +20,31 @@ function Navbar() {
   }, []);
 
   const checkAuth = async () => {
+    const path = location.pathname;
+    const isPublicPath = PUBLIC_PATHS.some(p => path === p || path.startsWith(p + '/'));
+    const hasToken = localStorage.getItem('token');
+
+    // On public pages with no token, skip API call to avoid 401 noise in console
+    if (isPublicPath && !hasToken) {
+      setIsLoggedIn(false);
+      setIsCheckingAuth(false);
+      return;
+    }
+
     try {
-      // Try to get profile - if cookie exists and valid, this will work
       const response = await authAPI.getProfile();
-      
       if (response.data.success) {
         setIsLoggedIn(true);
         setUserName(response.data.data.name || 'User');
-        
-        // Determine user type from profile data
-        const type = response.data.data.category ? 'worker' : 
-                     response.data.data.role === 'admin' ? 'admin' : 'user';
+        const type = response.data.data.category ? 'worker' : response.data.data.role === 'admin' ? 'admin' : 'user';
         setUserType(type);
-        
-        // Update localStorage for UI purposes (non-sensitive data only)
         localStorage.setItem('userName', response.data.data.name);
         localStorage.setItem('userType', type);
+      } else {
+        setIsLoggedIn(false);
       }
     } catch (error) {
-      // No valid cookie or not authenticated
       setIsLoggedIn(false);
-      // Clean up any stale localStorage
       localStorage.removeItem('token');
       localStorage.removeItem('userName');
       localStorage.removeItem('userType');

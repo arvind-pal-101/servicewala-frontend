@@ -4,14 +4,19 @@ import { categoryAPI } from '../services/api';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import { Helmet } from 'react-helmet-async';
+import axios from 'axios';
+
+const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
 
 function Home() {
   const [categories, setCategories] = useState([]);
   const [searchCity, setSearchCity] = useState('Ayodhya');
+  const [stats, setStats] = useState(null);
   const navigate = useNavigate();
 
   useEffect(() => {
     fetchCategories();
+    fetchPublicStats();
   }, []);
 
   const fetchCategories = async () => {
@@ -23,24 +28,34 @@ function Home() {
     }
   };
 
+  const fetchPublicStats = async () => {
+    try {
+      const response = await axios.get(`${API_URL}/public/stats`);
+      if (response.data.success) {
+        setStats(response.data.data);
+      }
+    } catch (error) {
+      console.error('Stats fetch error:', error);
+    }
+  };
+
   const handleSearch = () => {
     navigate(`/search?city=${searchCity}`);
   };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-orange-50">
-
-    <Helmet>
-      <title>ServiceWala - Find Local Service Providers in Ayodhya</title>
-      <meta name="description" content="Connect with verified plumbers, electricians, carpenters, and home service professionals in Ayodhya. Book trusted workers at affordable rates." />
-      <meta name="keywords" content="home services Ayodhya, plumber Ayodhya, electrician Ayodhya, carpenter, local workers" />
-      <link rel="canonical" href="https://servicewala.com/" />
-    </Helmet>
+      <Helmet>
+        <title>ServiceBabu - Find Local Service Providers in Ayodhya</title>
+        <meta name="description" content="Connect with verified plumbers, electricians, carpenters, and home service professionals in Ayodhya." />
+        <meta name="keywords" content="home services Ayodhya, plumber Ayodhya, electrician Ayodhya, carpenter, local workers" />
+        <link rel="canonical" href="https://servicebabu.in/" />
+      </Helmet>
 
       <Navbar />
-      {/* Hero Section - Modern & Eye-Catching */}
+
+      {/* Hero Section */}
       <section className="relative overflow-hidden">
-        {/* Background Pattern */}
         <div className="absolute inset-0 opacity-10">
           <div className="absolute top-0 left-0 w-96 h-96 bg-blue-500 rounded-full filter blur-3xl animate-float"></div>
           <div className="absolute bottom-0 right-0 w-96 h-96 bg-orange-500 rounded-full filter blur-3xl animate-float" style={{animationDelay: '1s'}}></div>
@@ -48,26 +63,19 @@ function Home() {
 
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-20 pb-24">
           <div className="text-center animate-slide-up">
-            
-            {/* Main Heading - Gradient Text */}
             <h1 className="text-5xl md:text-6xl font-bold mb-6">
               <span className="gradient-text">Find Trusted Workers</span>
               <br />
               <span className="text-gray-800">Near You</span>
             </h1>
-
-            {/* Subheading */}
             <p className="text-xl text-gray-600 mb-8 max-w-2xl mx-auto">
               Connect with verified local service providers in{' '}
               <span className="text-primary font-semibold">Ayodhya</span>
             </p>
 
-            {/* Search Box - Modern Card */}
             <div className="max-w-2xl mx-auto">
               <div className="glass rounded-2xl p-6 shadow-2xl">
                 <div className="flex flex-col sm:flex-row gap-4">
-                  
-                  {/* Location Input */}
                   <div className="flex-1 relative">
                     <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
                       <span className="text-2xl">📍</span>
@@ -80,8 +88,6 @@ function Home() {
                       className="w-full pl-14 pr-4 py-4 rounded-xl border-2 border-gray-200 focus:border-primary focus:ring-2 focus:ring-primary focus:ring-opacity-20 outline-none text-lg"
                     />
                   </div>
-
-                  {/* Search Button */}
                   <button
                     onClick={handleSearch}
                     className="px-8 py-4 bg-gradient-to-r from-primary to-blue-600 text-white rounded-xl font-semibold text-lg hover:shadow-xl transform hover:scale-105 transition-all"
@@ -92,7 +98,6 @@ function Home() {
               </div>
             </div>
 
-            {/* Trust Badges */}
             <div className="flex flex-wrap justify-center gap-8 mt-12 text-gray-600">
               <div className="flex items-center gap-2">
                 <span className="text-2xl">✅</span>
@@ -111,21 +116,14 @@ function Home() {
         </div>
       </section>
 
-      {/* Categories Section - Modern Cards */}
+      {/* Categories Section */}
       <section className="py-16 px-4">
         <div className="max-w-7xl mx-auto">
-          
-          {/* Section Header */}
           <div className="text-center mb-12">
-            <h2 className="text-4xl font-bold text-gray-800 mb-4">
-              Popular Services
-            </h2>
-            <p className="text-gray-600 text-lg">
-              Choose from our wide range of services
-            </p>
+            <h2 className="text-4xl font-bold text-gray-800 mb-4">Popular Services</h2>
+            <p className="text-gray-600 text-lg">Choose from our wide range of services</p>
           </div>
 
-          {/* Category Grid */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
             {categories.map((category) => (
               <div
@@ -133,22 +131,18 @@ function Home() {
                 onClick={() => navigate(`/search?category=${category._id}`)}
                 className="card-hover cursor-pointer bg-white rounded-2xl p-6 shadow-lg text-center group"
               >
-                {/* Icon */}
                 <div className="text-6xl mb-4 group-hover:scale-110 transition-transform">
                   {category.icon}
                 </div>
-                
-                {/* Name */}
                 <h3 className="text-xl font-semibold text-gray-800 mb-2">
                   {category.name}
                 </h3>
-                
-                {/* Worker Count */}
-                <p className="text-gray-500 text-sm">
-                  {category.workerCount || 0}+ workers
-                </p>
-
-                {/* Hover Arrow */}
+                {/* Only show worker count if greater than 0 */}
+                {category.workerCount > 0 && (
+                  <p className="text-gray-500 text-sm">
+                    {category.workerCount}+ workers
+                  </p>
+                )}
                 <div className="mt-4 text-primary opacity-0 group-hover:opacity-100 transition-opacity">
                   <span className="text-sm font-medium">View Workers →</span>
                 </div>
@@ -158,82 +152,65 @@ function Home() {
         </div>
       </section>
 
-      {/* How It Works - Modern Steps */}
+      {/* How It Works */}
       <section className="py-16 px-4 bg-gradient-to-r from-blue-50 to-purple-50">
         <div className="max-w-7xl mx-auto">
-          
           <div className="text-center mb-12">
-            <h2 className="text-4xl font-bold text-gray-800 mb-4">
-              How It Works
-            </h2>
-            <p className="text-gray-600 text-lg">
-              Get your work done in 3 simple steps
-            </p>
+            <h2 className="text-4xl font-bold text-gray-800 mb-4">How It Works</h2>
+            <p className="text-gray-600 text-lg">Get your work done in 3 simple steps</p>
           </div>
 
           <div className="grid md:grid-cols-3 gap-8">
-            
-            {/* Step 1 */}
             <div className="text-center">
-              <div className="w-20 h-20 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center text-white text-3xl font-bold mx-auto mb-6 shadow-xl">
-                1
-              </div>
+              <div className="w-20 h-20 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center text-white text-3xl font-bold mx-auto mb-6 shadow-xl">1</div>
               <h3 className="text-2xl font-semibold mb-3">Search</h3>
-              <p className="text-gray-600">
-                Find the right worker for your needs from verified professionals
-              </p>
+              <p className="text-gray-600">Find the right worker for your needs from verified professionals</p>
             </div>
-
-            {/* Step 2 */}
             <div className="text-center">
-              <div className="w-20 h-20 bg-gradient-to-br from-orange-500 to-orange-600 rounded-full flex items-center justify-center text-white text-3xl font-bold mx-auto mb-6 shadow-xl">
-                2
-              </div>
+              <div className="w-20 h-20 bg-gradient-to-br from-orange-500 to-orange-600 rounded-full flex items-center justify-center text-white text-3xl font-bold mx-auto mb-6 shadow-xl">2</div>
               <h3 className="text-2xl font-semibold mb-3">Book</h3>
-              <p className="text-gray-600">
-                Schedule a service at your preferred date and time
-              </p>
+              <p className="text-gray-600">Schedule a service at your preferred date and time</p>
             </div>
-
-            {/* Step 3 */}
             <div className="text-center">
-              <div className="w-20 h-20 bg-gradient-to-br from-green-500 to-green-600 rounded-full flex items-center justify-center text-white text-3xl font-bold mx-auto mb-6 shadow-xl">
-                3
-              </div>
+              <div className="w-20 h-20 bg-gradient-to-br from-green-500 to-green-600 rounded-full flex items-center justify-center text-white text-3xl font-bold mx-auto mb-6 shadow-xl">3</div>
               <h3 className="text-2xl font-semibold mb-3">Done!</h3>
-              <p className="text-gray-600">
-                Get quality service and rate your experience
-              </p>
+              <p className="text-gray-600">Get quality service and rate your experience</p>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Stats Section */}
-      <section className="py-16 px-4">
-        <div className="max-w-7xl mx-auto">
-          <div className="glass rounded-3xl p-12">
-            <div className="grid md:grid-cols-3 gap-8 text-center">
-              
-              <div>
-                <div className="text-5xl font-bold gradient-text mb-2">500+</div>
-                <p className="text-gray-600 text-lg">Verified Workers</p>
-              </div>
-
-              <div>
-                <div className="text-5xl font-bold gradient-text mb-2">2000+</div>
-                <p className="text-gray-600 text-lg">Happy Customers</p>
-              </div>
-
-              <div>
-                <div className="text-5xl font-bold gradient-text mb-2">4.8⭐</div>
-                <p className="text-gray-600 text-lg">Average Rating</p>
+      {/* Stats Section — Real Data, Show Only When Available */}
+      {stats && (stats.totalWorkers > 0 || stats.totalUsers > 0) && (
+        <section className="py-16 px-4">
+          <div className="max-w-7xl mx-auto">
+            <div className="glass rounded-3xl p-12">
+              <div className="grid md:grid-cols-3 gap-8 text-center">
+                {stats.totalWorkers > 0 && (
+                  <div>
+                    <div className="text-5xl font-bold gradient-text mb-2">{stats.totalWorkers}+</div>
+                    <p className="text-gray-600 text-lg">Verified Workers</p>
+                  </div>
+                )}
+                {stats.totalUsers > 0 && (
+                  <div>
+                    <div className="text-5xl font-bold gradient-text mb-2">{stats.totalUsers}+</div>
+                    <p className="text-gray-600 text-lg">Happy Customers</p>
+                  </div>
+                )}
+                {stats.averageRating > 0 && (
+                  <div>
+                    <div className="text-5xl font-bold gradient-text mb-2">{stats.averageRating}⭐</div>
+                    <p className="text-gray-600 text-lg">Average Rating</p>
+                  </div>
+                )}
               </div>
             </div>
           </div>
-        </div>
-      </section>
-    <Footer />
+        </section>
+      )}
+
+      <Footer />
     </div>
   );
 }
