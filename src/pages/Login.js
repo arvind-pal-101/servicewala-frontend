@@ -6,7 +6,6 @@ import { authAPI } from '../services/api';
 import { toast } from 'react-toastify';
 import { trackLogin } from '../utils/analytics';
 
-
 function Login() {
   const navigate = useNavigate();
   const [userType, setUserType] = useState('user'); // 'user' or 'worker'
@@ -24,50 +23,51 @@ function Login() {
   };
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
+  e.preventDefault();
 
-    if (!formData.phone || !formData.password) {
-      toast.error('Please fill all fields');
-      return;
+  if (!formData.phone || !formData.password) {
+    toast.error('Please fill all fields');
+    return;
+  }
+
+  if (formData.phone.length !== 10) {
+    toast.error('Please enter valid 10-digit phone number');
+    return;
+  }
+
+  try {
+    setLoading(true);
+
+    const loginAPI = userType === 'user' 
+      ? authAPI.loginUser 
+      : authAPI.loginWorker;
+
+    const response = await loginAPI(formData);
+
+    if (response.data.success) {
+      
+      trackLogin(userType); // Track login
+      
+      // Token in httpOnly cookie - use 'auth' flag for UI checks (isLoggedIn, favorites, etc.)
+      localStorage.setItem('token', 'authenticated');
+      localStorage.setItem('userType', userType);
+      localStorage.setItem('userName', response.data.data.name);
+      
+      toast.success(`Welcome back, ${response.data.data.name}! 🎉`);
+
+      const redirectPath = userType === 'worker' ? '/worker/dashboard' : '/dashboard';
+
+// Force hard redirect (navigate not working, use window.location)
+setTimeout(() => {
+  window.location.href = redirectPath;
+}, 500);  // Increased delay for toast
     }
-
-    if (formData.phone.length !== 10) {
-      toast.error('Please enter valid 10-digit phone number');
-      return;
-    }
-
-    try {
-      setLoading(true);
-
-      const loginAPI = userType === 'user' 
-        ? authAPI.loginUser 
-        : authAPI.loginWorker;
-
-      const response = await loginAPI(formData);
-
-      if (response.data.success) {
-          trackLogin(userType); // Track login
-        // Save token and user type
-        localStorage.setItem('token', response.data.data.token);
-        localStorage.setItem('userType', userType);
-        localStorage.setItem('userName', response.data.data.name);
-
-        toast.success(`Welcome back, ${response.data.data.name}! 🎉`);
-
-        // Redirect based on user type
-        if (userType === 'worker') {
-          navigate('/worker/dashboard');
-        } else {
-          navigate('/dashboard');
-        }
-      }
-    } catch (error) {
-      console.error('Login error:', error);
-      toast.error(error.response?.data?.message || 'Invalid credentials');
-    } finally {
-      setLoading(false);
-    }
-  };
+  } catch (error) {
+    toast.error(error.response?.data?.message || 'Invalid credentials');
+  } finally {
+    setLoading(false);
+  }
+};
 
   return (
     <>

@@ -1,23 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
-import axios from 'axios';
-
-const api = axios.create({
-  baseURL: 'http://localhost:5000/api',
-  headers: {
-    'Content-Type': 'application/json',
-  },
-});
-
-// Add token to requests
-api.interceptors.request.use((config) => {
-  const token = localStorage.getItem('token');
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
-  }
-  return config;
-});
+import api from '../services/api';
 
 function AdminDashboard() {
   const navigate = useNavigate();
@@ -42,8 +26,9 @@ function AdminDashboard() {
   }, []);
 
   const checkAuth = () => {
-    const adminToken = localStorage.getItem('adminToken');
-    if (!adminToken) {
+    const token = localStorage.getItem('token');
+    const userType = localStorage.getItem('userType');
+    if (!token || userType !== 'admin') {
       toast.error('Please login as admin');
       navigate('/admin/login');
     }
@@ -115,8 +100,9 @@ function AdminDashboard() {
   };
 
   const handleLogout = () => {
-    localStorage.removeItem('adminToken');
-    localStorage.removeItem('adminEmail');
+    localStorage.removeItem('token');
+    localStorage.removeItem('userType');
+    localStorage.removeItem('userName');
     toast.success('Logged out successfully!');
     navigate('/admin/login');
   };

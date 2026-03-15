@@ -97,8 +97,12 @@ function WorkerRegister() {
       const response = await authAPI.registerWorker(registerData);
 
       if (response.data.success) {
+        // Token is in httpOnly cookie but worker needs admin approval
+        // Don't save anything - redirect to login
         toast.success('🎉 Registration successful! Waiting for admin approval.');
         toast.info('You will be notified once verified');
+        
+        // Redirect to login page (worker must login after approval)
         navigate('/login');
       }
     } catch (error) {

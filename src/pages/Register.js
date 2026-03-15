@@ -6,7 +6,6 @@ import { authAPI } from '../services/api';
 import { toast } from 'react-toastify';
 import { Helmet } from 'react-helmet-async';
 
-
 function Register() {
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
@@ -66,8 +65,7 @@ function Register() {
       const response = await authAPI.registerUser(registerData);
 
       if (response.data.success) {
-        // Save token and user info
-        localStorage.setItem('token', response.data.data.token);
+        localStorage.setItem('token', 'authenticated');
         localStorage.setItem('userType', 'user');
         localStorage.setItem('userName', response.data.data.name);
 
@@ -84,6 +82,11 @@ function Register() {
 
   return (
     <>
+      <Helmet>
+        <title>Register - ServiceWala</title>
+        <meta name="description" content="Create your ServiceWala account to book trusted local service providers." />
+      </Helmet>
+      
       <Navbar />
 
       <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 py-12 px-4">
@@ -182,10 +185,7 @@ function Register() {
                   required
                 />
               </div>
-            <Helmet>
-  <title>Login - ServiceWala</title>
-  <meta name="description" content="Login to ServiceWala to book services, manage bookings, and connect with local professionals." />
-</Helmet>
+
               {/* Confirm Password */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">

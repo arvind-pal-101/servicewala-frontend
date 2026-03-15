@@ -21,11 +21,12 @@ function WorkerDashboard() {
   });
 
   useEffect(() => {
-    checkAuth();
+   // checkAuth();
     fetchWorkerData();
     fetchBookings();
   }, []);
 
+  {/*
   const checkAuth = () => {
     const token = localStorage.getItem('token');
     const userType = localStorage.getItem('userType');
@@ -35,6 +36,7 @@ function WorkerDashboard() {
       navigate('/login');
     }
   };
+  */}
 
   const fetchWorkerData = async () => {
     try {
@@ -314,6 +316,16 @@ function WorkerDashboard() {
                                 <p>📞 {booking.customer?.phone}</p>
                                 <p>📅 {new Date(booking.scheduledDate).toLocaleDateString('en-IN')} - {booking.scheduledTime}</p>
                                 <p>📍 {booking.serviceDetails?.serviceAddress?.address}, {booking.serviceDetails?.serviceAddress?.city}</p>
+                                {booking.serviceDetails?.serviceAddress?.coordinates?.latitude != null && booking.serviceDetails?.serviceAddress?.coordinates?.longitude != null && (
+                                  <a
+                                    href={`https://www.google.com/maps?q=${booking.serviceDetails.serviceAddress.coordinates.latitude},${booking.serviceDetails.serviceAddress.coordinates.longitude}`}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="text-primary text-sm font-medium hover:underline"
+                                  >
+                                    🗺️ Open in Google Maps
+                                  </a>
+                                )}
                                 <p className="font-medium text-gray-800">
                                   💬 {booking.serviceDetails?.problemDescription}
                                 </p>
@@ -381,7 +393,7 @@ function WorkerDashboard() {
               )}
 
               {/* Images Tab */}
-              {activeTab === 'images' && <WorkerImageManager />}
+              {activeTab === 'images' && <WorkerImageManager onRefresh={fetchWorkerData} />}
 
               {/* Profile Tab */}
               {activeTab === 'profile' && worker && (

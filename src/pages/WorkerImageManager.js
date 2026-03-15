@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import ImageUpload from '../components/ImageUpload';
 import { authAPI, imageAPI } from '../services/api';
 
-const WorkerImageManager = () => {
+const WorkerImageManager = ({ onRefresh }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [deleting, setDeleting] = useState(null);
@@ -11,7 +11,7 @@ const WorkerImageManager = () => {
   const fetchProfile = async () => {
     try {
       const response = await authAPI.getProfile();
-      setUser(response.data);
+      setUser(response.data?.data ?? null);
     } catch (error) {
       console.error('Error fetching profile:', error);
     } finally {
@@ -29,6 +29,7 @@ const WorkerImageManager = () => {
       ...prev,
       profileImage: data.profileImage
     }));
+    onRefresh?.();
   };
 
   // Handle portfolio upload success
@@ -37,6 +38,7 @@ const WorkerImageManager = () => {
       ...prev,
       portfolio: data.portfolio
     }));
+    onRefresh?.();
   };
 
   // Delete profile image
@@ -52,6 +54,7 @@ const WorkerImageManager = () => {
         ...prev,
         profileImage: null
       }));
+      onRefresh?.();
       alert('Profile image deleted successfully');
     } catch (error) {
       alert(error.response?.data?.message || 'Failed to delete profile image');
@@ -73,6 +76,7 @@ const WorkerImageManager = () => {
         ...prev,
         portfolio: prev.portfolio.filter(img => img.publicId !== publicId)
       }));
+      onRefresh?.();
       alert('Portfolio image deleted successfully');
     } catch (error) {
       alert(error.response?.data?.message || 'Failed to delete image');

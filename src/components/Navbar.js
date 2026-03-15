@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
+import { authAPI } from '../services/api';
 
 function Navbar() {
   const navigate = useNavigate();
@@ -9,35 +10,93 @@ function Navbar() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [userName, setUserName] = useState('');
   const [userType, setUserType] = useState('');
+  const [isCheckingAuth, setIsCheckingAuth] = useState(true);
 
   useEffect(() => {
     checkAuth();
   }, []);
 
-  const checkAuth = () => {
-    const token = localStorage.getItem('token');
-    const name = localStorage.getItem('userName');
-    const type = localStorage.getItem('userType');
-    
-    if (token) {
-      setIsLoggedIn(true);
-      setUserName(name || 'User');
-      setUserType(type || 'user');
+  const checkAuth = async () => {
+    try {
+      // Try to get profile - if cookie exists and valid, this will work
+      const response = await authAPI.getProfile();
+      
+      if (response.data.success) {
+        setIsLoggedIn(true);
+        setUserName(response.data.data.name || 'User');
+        
+        // Determine user type from profile data
+        const type = response.data.data.category ? 'worker' : 
+                     response.data.data.role === 'admin' ? 'admin' : 'user';
+        setUserType(type);
+        
+        // Update localStorage for UI purposes (non-sensitive data only)
+        localStorage.setItem('userName', response.data.data.name);
+        localStorage.setItem('userType', type);
+      }
+    } catch (error) {
+      // No valid cookie or not authenticated
+      setIsLoggedIn(false);
+      // Clean up any stale localStorage
+      localStorage.removeItem('token');
+      localStorage.removeItem('userName');
+      localStorage.removeItem('userType');
+    } finally {
+      setIsCheckingAuth(false);
     }
   };
 
-  const handleLogout = () => {
-    localStorage.removeItem('token');
-    localStorage.removeItem('userName');
-    localStorage.removeItem('userType');
-    setIsLoggedIn(false);
-    toast.success('Logged out successfully! 👋');
-    navigate('/');
+  const handleLogout = async () => {
+    try {
+      // Call logout API to clear cookie
+      await authAPI.logout();
+      
+      // Clear localStorage
+      localStorage.removeItem('token');
+      localStorage.removeItem('userName');
+      localStorage.removeItem('userType');
+      
+      // Update state
+      setIsLoggedIn(false);
+      setUserName('');
+      setUserType('');
+      
+      toast.success('Logged out successfully! 👋');
+      navigate('/');
+    } catch (error) {
+      // Even if logout API fails, clear local state
+      localStorage.removeItem('token');
+      localStorage.removeItem('userName');
+      localStorage.removeItem('userType');
+      setIsLoggedIn(false);
+      toast.success('Logged out successfully! 👋');
+      navigate('/');
+    }
   };
 
   const getDashboardLink = () => {
+    if (userType === 'admin') return '/admin/dashboard';
     return userType === 'worker' ? '/worker/dashboard' : '/dashboard';
   };
+
+  // Show nothing while checking auth (prevents flash of login button)
+  if (isCheckingAuth) {
+    return (
+      <nav className="bg-white shadow-md sticky top-0 z-50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between items-center h-16">
+            <Link to="/" className="flex items-center space-x-2">
+              <div className="w-10 h-10 bg-gradient-to-br from-primary to-blue-600 rounded-lg flex items-center justify-center">
+                <span className="text-white font-bold text-xl">SW</span>
+              </div>
+              <span className="text-2xl font-bold gradient-text hidden sm:block">ServiceWala</span>
+            </Link>
+            <div className="w-20 h-8 bg-gray-200 rounded animate-pulse"></div>
+          </div>
+        </div>
+      </nav>
+    );
+  }
 
   return (
     <nav className="bg-white shadow-md sticky top-0 z-50">

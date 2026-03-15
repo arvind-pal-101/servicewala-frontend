@@ -19,13 +19,13 @@ function UserDashboard() {
   const [favLoading, setFavLoading] = useState(false);
 
   useEffect(() => {
-    checkAuth();
+    //checkAuth();
     fetchUserData();
     fetchBookings();
     fetchFavorites();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-
+{/*
   const checkAuth = () => {
     const token = localStorage.getItem('token');
     const userType = localStorage.getItem('userType');
@@ -34,7 +34,8 @@ function UserDashboard() {
       toast.error('Please login as customer');
       navigate('/login');
     }
-  };
+  };  
+  */}
 
   const fetchUserData = async () => {
     try {

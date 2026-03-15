@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import api from '../services/api'; // import axios instance with credentials
 
 const ImageUpload = ({ 
   type = 'profile', // 'profile' or 'portfolio'
@@ -11,28 +12,22 @@ const ImageUpload = ({
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState('');
 
-  // Handle file selection
   const handleFileChange = (e) => {
     const files = Array.from(e.target.files);
     
-    // Validate file count
     if (files.length > maxFiles) {
       setError(`You can only upload ${maxFiles} image(s) at a time`);
       return;
     }
 
-    // Validate file types and sizes
     const validFiles = [];
     const newPreviews = [];
     
     for (const file of files) {
-      // Check file type
       if (!file.type.startsWith('image/')) {
         setError('Only image files are allowed');
         continue;
       }
-      
-      // Check file size (5MB)
       if (file.size > 5 * 1024 * 1024) {
         setError('Image size must be less than 5MB');
         continue;
@@ -40,7 +35,6 @@ const ImageUpload = ({
       
       validFiles.push(file);
       
-      // Create preview
       const reader = new FileReader();
       reader.onloadend = () => {
         newPreviews.push(reader.result);
@@ -55,8 +49,7 @@ const ImageUpload = ({
     setError('');
   };
 
-  // Handle upload
-  const handleUpload = async () => {
+  const handleUpload = async () => { 
     if (selectedFiles.length === 0) {
       setError('Please select an image first');
       return;
@@ -68,6 +61,9 @@ const ImageUpload = ({
     try {
       const formData = new FormData();
       
+      // 🔴 CRITICAL: Add 'type' field (backend validator requires it)
+      formData.append('type', type); // 'profile' or 'portfolio'
+
       if (type === 'profile') {
         formData.append('profileImage', selectedFiles[0]);
       } else {
@@ -76,44 +72,30 @@ const ImageUpload = ({
         });
       }
 
-      const token = localStorage.getItem('token');
-      const endpoint = type === 'profile' 
-        ? 'http://localhost:5000/api/upload/profile'
-        : 'http://localhost:5000/api/upload/portfolio';
-
-      const response = await fetch(endpoint, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${token}`
-        },
-        body: formData
+      const endpoint = type === 'profile' ? '/upload/profile' : '/upload/portfolio';
+      
+      // Axios will automatically include cookies (withCredentials: true)
+      const response = await api.post(endpoint, formData, {
+        headers: { 'Content-Type': 'multipart/form-data' }
       });
 
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.message || 'Upload failed');
-      }
-
-      // Clear selection
       setSelectedFiles([]);
       setPreviews([]);
       
-      // Call success callback
       if (onUploadSuccess) {
-        onUploadSuccess(data);
+        onUploadSuccess(response.data);
       }
 
       alert(`${type === 'profile' ? 'Profile image' : 'Portfolio images'} uploaded successfully!`);
 
     } catch (err) {
-      setError(err.message);
+      const message = err.response?.data?.message || err.message || 'Upload failed';
+      setError(message);
     } finally {
       setUploading(false);
     }
   };
 
-  // Handle cancel
   const handleCancel = () => {
     setSelectedFiles([]);
     setPreviews([]);
@@ -126,7 +108,6 @@ const ImageUpload = ({
         {type === 'profile' ? 'Upload Profile Image' : 'Upload Portfolio Images'}
       </h3>
 
-      {/* Current Image Preview (for profile) */}
       {type === 'profile' && currentImage && previews.length === 0 && (
         <div className="mb-4">
           <p className="text-sm text-gray-600 mb-2">Current Profile Image:</p>
@@ -138,7 +119,6 @@ const ImageUpload = ({
         </div>
       )}
 
-      {/* File Input */}
       <div className="mb-4">
         <input
           type="file"
@@ -150,13 +130,12 @@ const ImageUpload = ({
         />
         <p className="text-xs text-gray-500 mt-1">
           {type === 'profile' 
-            ? 'JPG, PNG, WEBP up to 5MB'
-            : `Upload up to ${maxFiles} images (JPG, PNG, WEBP up to 5MB each)`
+            ? 'JPG, PNG, WEBP, AVIF up to 5MB'
+            : `Upload up to ${maxFiles} images (JPG, PNG, WEBP, AVIF up to 5MB each)`
           }
         </p>
       </div>
 
-      {/* Preview */}
       {previews.length > 0 && (
         <div className="mb-4">
           <p className="text-sm text-gray-600 mb-2">Preview:</p>
@@ -177,14 +156,12 @@ const ImageUpload = ({
         </div>
       )}
 
-      {/* Error Message */}
       {error && (
         <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded text-red-700 text-sm">
           {error}
         </div>
       )}
 
-      {/* Buttons */}
       {selectedFiles.length > 0 && (
         <div className="flex gap-3">
           <button

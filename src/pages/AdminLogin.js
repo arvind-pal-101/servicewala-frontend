@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { toast } from 'react-toastify';
-import axios from 'axios';
+import { authAPI } from '../services/api';
 
 function AdminLogin() {
   const navigate = useNavigate();
@@ -21,15 +21,22 @@ function AdminLogin() {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // Hardcoded admin credentials (for demo)
-    // In production, ye backend se verify hoga
-    if (formData.email === 'admin@servicewala.com' && formData.password === 'admin123') {
-      localStorage.setItem('adminToken', 'admin-token-12345');
-      localStorage.setItem('adminEmail', formData.email);
-      toast.success('Welcome Admin! 👨‍💼');
-      navigate('/admin/dashboard');
-    } else {
-      toast.error('Invalid admin credentials');
+    try {
+      setLoading(true);
+      const res = await authAPI.loginAdmin(formData);
+
+      if (res.data.success) {
+        localStorage.setItem('token', 'authenticated');
+        localStorage.setItem('userType', 'admin');
+        localStorage.setItem('userName', res.data.data.name || 'Admin');
+
+        toast.success('Welcome Admin! 👨‍💼');
+        navigate('/admin/dashboard');
+      }
+    } catch (error) {
+      toast.error(error.response?.data?.message || 'Invalid admin credentials');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -54,11 +61,10 @@ function AdminLogin() {
             <p className="text-gray-600">Login to manage platform</p>
           </div>
 
-          {/* Demo Credentials Box */}
+          {/* Note */}
           <div className="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
-            <p className="text-sm font-semibold text-blue-800 mb-2">Demo Credentials:</p>
-            <p className="text-sm text-blue-700">Email: admin@servicewala.com</p>
-            <p className="text-sm text-blue-700">Password: admin123</p>
+            <p className="text-sm font-semibold text-blue-800 mb-1">Admin login</p>
+            <p className="text-sm text-blue-700">Use your admin account credentials.</p>
           </div>
 
           {/* Login Form */}

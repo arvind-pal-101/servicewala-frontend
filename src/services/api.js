@@ -7,36 +7,75 @@ const api = axios.create({
   baseURL: API_URL,
   headers: {
     'Content-Type': 'application/json'
-  }
+  },
+  withCredentials: true  // ← CRITICAL: Send cookies with every request!
 });
 
-// Add token to requests
-api.interceptors.request.use(
-  (config) => {
-    const token = localStorage.getItem('token');
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
-    }
-    return config;
-  },
+// Remove Authorization header interceptor - cookies handle auth now!
+// No request interceptor needed anymore
+
+// Auto-logout on 401 (invalid/expired token)
+// Auto-logout on 401 (invalid/expired token)
+api.interceptors.response.use(
+  (response) => response,
   (error) => {
+    if (error?.response?.status === 401) {
+      // Clear any localStorage data (for migration cleanup)
+      localStorage.removeItem('token');
+      localStorage.removeItem('userType');
+      localStorage.removeItem('userName');
+      
+      // List of public pages that don't need authentication
+      const publicPages = [
+        '/',
+        '/login',
+        '/register',
+        '/worker/register',
+        '/admin/login',
+        '/forgot-password',
+        '/reset-password',
+        '/about',
+        '/services',
+        '/contact',
+        '/faq',
+        '/terms',
+        '/privacy',
+        '/refund-policy',
+        '/search'
+      ];
+      
+      // Check if current page is public or starts with public path
+      const isPublicPage = publicPages.some(page => 
+        window.location.pathname === page || 
+        window.location.pathname.startsWith(page + '/')
+      );
+      
+      // Only redirect to login if on a protected page
+      if (!isPublicPage) {
+        window.location.href = '/login';
+      }
+    }
     return Promise.reject(error);
   }
 );
 
 // Auth APIs
 export const authAPI = {
-  registerUser: (data) => api.post('/auth/register', data),           // ← FIXED
-  loginUser: (data) => api.post('/auth/login', data),                 // ← FIXED
+  registerUser: (data) => api.post('/auth/register', data),
+  loginUser: (data) => api.post('/auth/login', data),
+  loginAdmin: (data) => api.post('/auth/admin/login', data),
   registerWorker: (data) => api.post('/auth/worker/register', data),
   loginWorker: (data) => api.post('/auth/worker/login', data),
-  getProfile: () => api.get('/auth/profile'),                         // ← Now matches!
+  logout: () => api.post('/auth/logout'),  // ← NEW: Logout API
+  getProfile: () => api.get('/auth/profile'),
   updateAvailability: (status) => api.put('/auth/worker/availability', { isAvailable: status }),
-
-   // Favorite workers - ADD THESE 3 LINES
+  
+  // Favorite workers
   addFavorite: (workerId) => api.post(`/auth/favorites/${workerId}`),
   removeFavorite: (workerId) => api.delete(`/auth/favorites/${workerId}`),
   getFavorites: () => api.get('/auth/favorites'),
+  
+  // Password reset
   forgotPassword: (data) => api.post('/auth/forgot-password', data),
   resetPassword: (token, data) => api.put(`/auth/reset-password/${token}`, data)
 };
@@ -67,12 +106,10 @@ export const bookingAPI = {
   cancelBooking: (id) => api.put(`/bookings/${id}/cancel`),
   confirmCashPayment: (id) => api.put(`/bookings/${id}/confirm-cash`)
 };
+
 // Image Upload APIs
 export const imageAPI = {
-  // Delete profile image
   deleteProfileImage: () => api.delete('/upload/profile'),
-  
-  // Delete portfolio image
   deletePortfolioImage: (publicId) => api.delete(`/upload/portfolio/${publicId}`)
 };
 
@@ -83,7 +120,7 @@ export const reviewAPI = {
   getMyReviews: () => api.get('/reviews/my-reviews'),
   updateReview: (id, data) => api.put(`/reviews/${id}`, data),
   deleteReview: (id) => api.delete(`/reviews/${id}`),
-  reportReview: (id, data) => api.post(`/reviews/${id}/report`, data)
+  reportReview: (id, data) => api.put(`/reviews/${id}/report`, data)
 };
 
 // Payment APIs

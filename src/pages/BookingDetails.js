@@ -265,6 +265,16 @@ function BookingDetails() {
                       {booking.serviceDetails?.serviceAddress?.address}, {booking.serviceDetails?.serviceAddress?.city}
                       {booking.serviceDetails?.serviceAddress?.pincode && ` - ${booking.serviceDetails.serviceAddress.pincode}`}
                     </p>
+                    {booking.serviceDetails?.serviceAddress?.coordinates?.latitude != null && booking.serviceDetails?.serviceAddress?.coordinates?.longitude != null && (
+                      <a
+                        href={`https://www.google.com/maps?q=${booking.serviceDetails.serviceAddress.coordinates.latitude},${booking.serviceDetails.serviceAddress.coordinates.longitude}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-primary text-sm font-medium hover:underline mt-1 inline-block"
+                      >
+                        🗺️ Open in Google Maps
+                      </a>
+                    )}
                   </div>
                   <div>
                     <h3 className="text-sm text-gray-600 mb-1">Scheduled Date & Time</h3>

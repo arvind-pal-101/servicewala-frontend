@@ -30,6 +30,8 @@ function BookingPage() {
     serviceAddress: '',
     serviceCity: '',
     servicePincode: '',
+    latitude: '',
+    longitude: '',
     
     // Scheduling
     scheduledDate: '',
@@ -126,7 +128,13 @@ function BookingPage() {
         serviceAddress: {
           address: formData.serviceAddress,
           city: formData.serviceCity,
-          pincode: formData.servicePincode
+          pincode: formData.servicePincode,
+          ...(formData.latitude && formData.longitude && {
+            coordinates: {
+              latitude: parseFloat(formData.latitude),
+              longitude: parseFloat(formData.longitude)
+            }
+          })
         },
         additionalNotes: formData.additionalNotes
       },
@@ -339,6 +347,38 @@ function BookingPage() {
                           maxLength="6"
                           className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent outline-none"
                         />
+                      </div>
+                    </div>
+                    <div className="mt-4 p-4 bg-blue-50 rounded-lg border border-blue-100">
+                      <p className="text-sm font-medium text-gray-800 mb-2">📍 Exact location (optional)</p>
+                      <p className="text-xs text-gray-600 mb-3">Worker can open in maps for accurate navigation.</p>
+                      <div className="flex flex-wrap gap-2">
+                        <button
+                          type="button"
+                          onClick={() => {
+                            if (!navigator.geolocation) {
+                              toast.error('Geolocation not supported');
+                              return;
+                            }
+                            navigator.geolocation.getCurrentPosition(
+                              (pos) => {
+                                setFormData(prev => ({
+                                  ...prev,
+                                  latitude: pos.coords.latitude.toFixed(6),
+                                  longitude: pos.coords.longitude.toFixed(6)
+                                }));
+                                toast.success('Location captured');
+                              },
+                              () => toast.error('Could not get location')
+                            );
+                          }}
+                          className="px-4 py-2 bg-primary text-white rounded-lg text-sm font-medium hover:bg-blue-600"
+                        >
+                          Use my current location
+                        </button>
+                        {(formData.latitude && formData.longitude) && (
+                          <span className="text-sm text-green-700 py-2">✓ {formData.latitude}, {formData.longitude}</span>
+                        )}
                       </div>
                     </div>
                   </div>

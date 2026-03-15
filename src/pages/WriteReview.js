@@ -16,19 +16,8 @@ function WriteReview() {
   const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
-    checkAuth();
     fetchBooking();
   }, [bookingId]);
-
-  const checkAuth = () => {
-    const token = localStorage.getItem('token');
-    const userType = localStorage.getItem('userType');
-    
-    if (!token || userType !== 'user') {
-      toast.error('Please login to write a review');
-      navigate('/login');
-    }
-  };
 
   const fetchBooking = async () => {
     try {
@@ -69,7 +58,7 @@ function WriteReview() {
       setSubmitting(true);
 
       await reviewAPI.create({
-        worker: booking.worker._id,
+        worker: booking.worker?._id || booking.worker,
         booking: bookingId,
         rating,
         comment: comment.trim()

@@ -64,7 +64,7 @@ const checkIfFavorite = async () => {
   try {
     const response = await authAPI.getFavorites();
     const favorites = response.data.data;
-    setIsFavorite(favorites.some(fav => fav._id === id));
+    setIsFavorite(favorites.some(fav => (fav._id?.toString?.() || fav._id) === id));
   } catch (error) {
     console.error('Error checking favorites:', error);
   }

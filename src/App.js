@@ -34,6 +34,7 @@ import HowItWorks from './pages/HowItWorks';
 import FAQ from './pages/FAQ';
 import Services from './pages/Services';
 import Contact from './pages/Contact';
+import ProtectedRoute from './components/ProtectedRoute';
 
 // Analytics wrapper component - INSIDE Router
 function AnalyticsWrapper({ children }) {
@@ -67,12 +68,28 @@ function App() {
               <Route path="/forgot-password" element={<ForgotPassword />} />
               <Route path="/reset-password/:token" element={<ResetPassword />} />
               <Route path="/worker/register" element={<WorkerRegister />} />
-              <Route path="/worker/dashboard" element={<WorkerDashboard />} />
+              <Route path="/worker/dashboard" element={
+                <ProtectedRoute allowedUserTypes={['worker']} redirectTo="/login">
+                  <WorkerDashboard />
+                </ProtectedRoute>
+              } />
               <Route path="/booking/:id" element={<BookingDetails />} />
-              <Route path="/dashboard" element={<UserDashboard />} />
+              <Route path="/dashboard" element={
+                <ProtectedRoute allowedUserTypes={['user']} redirectTo="/login">
+                  <UserDashboard />
+                </ProtectedRoute>
+              } />
               <Route path="/admin/login" element={<AdminLogin />} />
-              <Route path="/admin/dashboard" element={<AdminDashboard />} />
-              <Route path="/review/:bookingId" element={<WriteReview />} />
+              <Route path="/admin/dashboard" element={
+                <ProtectedRoute allowedUserTypes={['admin']} redirectTo="/admin/login">
+                  <AdminDashboard />
+                </ProtectedRoute>
+              } />
+              <Route path="/review/:bookingId" element={
+                <ProtectedRoute allowedUserTypes={['user']} redirectTo="/login">
+                  <WriteReview />
+                </ProtectedRoute>
+              } />
               <Route path="/payment/:bookingId" element={<PaymentPage />} />
               <Route path="/payment-success" element={<PaymentSuccess />} />
               <Route path="/payment-failed" element={<PaymentFailed />} /> 
