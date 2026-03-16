@@ -115,7 +115,7 @@ function Navbar() {
             <div className="w-10 h-10 bg-gradient-to-br from-primary to-blue-600 rounded-lg flex items-center justify-center">
               <span className="text-white font-bold text-xl">SB</span>
             </div>
-            <span className="text-2xl font-bold gradient-text hidden sm:block">ServiceWala</span>
+            <span className="text-2xl font-bold gradient-text hidden sm:block">ServiceBabu</span>
           </Link>
 
           {/* Desktop Navigation */}
