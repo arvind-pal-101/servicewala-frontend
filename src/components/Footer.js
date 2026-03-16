@@ -24,7 +24,7 @@ function Footer() {
             <div className="flex space-x-4">
               {/* Facebook */}
               <a 
-                href="https://facebook.com/servicebabu" 
+                href="https://www.facebook.com/profile.php?id=61579461597347" 
                 target="_blank" 
                 rel="noopener noreferrer" 
                 className="w-10 h-10 bg-gray-800 rounded-lg flex items-center justify-center hover:bg-blue-600 transition-colors"
@@ -36,7 +36,7 @@ function Footer() {
               </a>
               {/* Instagram */}
               <a 
-                href="https://instagram.com/servicebabu" 
+                href="https://www.instagram.com/servicebabu.in/" 
                 target="_blank" 
                 rel="noopener noreferrer" 
                 className="w-10 h-10 bg-gray-800 rounded-lg flex items-center justify-center hover:bg-pink-600 transition-colors"
@@ -50,7 +50,7 @@ function Footer() {
               </a>
               {/* WhatsApp */}
               <a 
-                href="https://wa.me/919876543210" 
+                href="https://wa.me/919565105299" 
                 target="_blank" 
                 rel="noopener noreferrer" 
                 className="w-10 h-10 bg-gray-800 rounded-lg flex items-center justify-center hover:bg-green-600 transition-colors"
