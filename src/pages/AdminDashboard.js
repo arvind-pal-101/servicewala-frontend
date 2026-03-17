@@ -71,14 +71,14 @@ function AdminDashboard() {
   };
 
   const handleVerifyWorker = async (workerId) => {
-    try {
-      await api.put(`/admin/workers/${workerId}/verify`);
-      toast.success('Worker verified successfully! ✅');
-      fetchAllData();
-    } catch (error) {
-      toast.error('Failed to verify worker');
-    }
-  };
+  try {
+    await api.put(`/admin/workers/${workerId}/verify`, { status: 'approved' });
+    toast.success('Worker verified successfully! ✅');
+    fetchAllData();
+  } catch (error) {
+    toast.error('Failed to verify worker');
+  }
+};
 
   const handleRejectWorker = async (workerId) => {
     const reason = prompt('Reason for rejection:');
