@@ -73,14 +73,26 @@ function BookingDetails() {
     }
   };
   const handleConfirmCash = async () => {
+  const amountInput = prompt(
+    `Enter the cash amount received from customer (₹):`
+  );
+  
+  if (!amountInput) return;
+  
+  const amount = parseInt(amountInput);
+  if (isNaN(amount) || amount <= 0) {
+    toast.error('Please enter valid amount');
+    return;
+  }
+
   const confirm = window.confirm(
-    `Confirm that you received ₹${booking.pricing?.finalAmount} in CASH from the customer?`
+    `Confirm that you received ₹${amount} in CASH from the customer?`
   );
   
   if (!confirm) return;
 
   try {
-    await bookingAPI.confirmCashPayment(id);
+    await bookingAPI.confirmCashPayment(id, { finalAmount: amount });
     toast.success('💵 Cash payment confirmed!');
     fetchBooking();
   } catch (error) {

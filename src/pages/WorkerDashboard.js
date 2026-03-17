@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
-import { bookingAPI, reviewAPI, authAPI } from '../services/api';
+import { bookingAPI, reviewAPI, authAPI, commissionAPI } from '../services/api';
 import { toast } from 'react-toastify';
 import WorkerImageManager from './WorkerImageManager';
 
@@ -14,17 +14,18 @@ function WorkerDashboard() {
   const [worker, setWorker] = useState(null);
   const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState({
-    pending: 0,
-    accepted: 0,
-    completed: 0,
-    totalEarnings: 0
-  });
+  pending: 0,
+  accepted: 0,
+  completed: 0,
+  totalEarnings: 0
+});
+const [commission, setCommission] = useState(null);
 
   useEffect(() => {
-   // checkAuth();
-    fetchWorkerData();
-    fetchBookings();
-  }, []);
+  fetchWorkerData();
+  fetchBookings();
+  fetchCommission();
+}, []);
 
   {/*
   const checkAuth = () => {
@@ -71,6 +72,14 @@ function WorkerDashboard() {
       setLoading(false);
     }
   };
+  const fetchCommission = async () => {
+  try {
+    const response = await commissionAPI.getMyCommission();
+    setCommission(response.data.data);
+  } catch (error) {
+    console.error('Commission fetch error:', error);
+  }
+};
 
   const handleAcceptBooking = async (bookingId) => {
     try {
@@ -280,6 +289,21 @@ function WorkerDashboard() {
                 >
                   👤 Profile
                 </button>
+                <button
+  onClick={() => setActiveTab('commission')}
+  className={`flex-1 px-6 py-4 font-semibold transition-colors ${
+    activeTab === 'commission'
+      ? 'bg-primary text-white'
+      : 'text-gray-600 hover:bg-gray-50'
+  }`}
+>
+  💰 Commission
+  {commission?.summary?.pendingCount > 0 && (
+    <span className="ml-2 bg-red-500 text-white text-xs px-2 py-1 rounded-full">
+      {commission.summary.pendingCount}
+    </span>
+  )}
+</button>
               </div>
             </div>
 
@@ -487,6 +511,139 @@ function WorkerDashboard() {
                   </div>
                 </div>
               )}
+              {/* Commission Tab */}
+{activeTab === 'commission' && (
+  <div>
+    {!commission?.commissionEnabled ? (
+      <div className="text-center py-12">
+        <div className="text-6xl mb-4">💰</div>
+        <h3 className="text-2xl font-bold text-gray-800 mb-2">Commission System</h3>
+        <p className="text-gray-600">Commission is currently disabled. No commission will be charged.</p>
+      </div>
+    ) : (
+      <div className="space-y-6">
+
+        {/* Block Warning */}
+        {commission?.summary?.isBlocked && (
+          <div className="bg-red-50 border-2 border-red-500 rounded-xl p-6">
+            <div className="flex items-center space-x-3">
+              <span className="text-3xl">🚫</span>
+              <div>
+                <h3 className="text-xl font-bold text-red-800">Account Blocked!</h3>
+                <p className="text-red-700">You have more than 3 pending commissions. Please clear pending commissions to unblock your account.</p>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Commission Summary */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="bg-red-50 rounded-xl p-6 text-center">
+            <p className="text-gray-600 text-sm mb-1">Pending Commission</p>
+            <p className="text-3xl font-bold text-red-600">₹{commission?.summary?.totalPending || 0}</p>
+            <p className="text-sm text-red-500">{commission?.summary?.pendingCount || 0} bookings</p>
+          </div>
+          <div className="bg-green-50 rounded-xl p-6 text-center">
+            <p className="text-gray-600 text-sm mb-1">Collected Commission</p>
+            <p className="text-3xl font-bold text-green-600">₹{commission?.summary?.totalCollected || 0}</p>
+          </div>
+          <div className="bg-blue-50 rounded-xl p-6 text-center">
+            <p className="text-gray-600 text-sm mb-1">Commission Rate</p>
+            <p className="text-3xl font-bold text-blue-600">{commission?.commissionRate || 0}%</p>
+          </div>
+        </div>
+
+        {/* Pending Commissions List */}
+        {commission?.pendingBookings?.length > 0 && (
+          <div>
+            <h3 className="text-xl font-bold text-gray-800 mb-4">⏳ Pending Commissions</h3>
+            <div className="space-y-4">
+              {commission.pendingBookings.map((booking) => (
+                <div key={booking._id} className="border-2 border-red-200 rounded-xl p-6 bg-red-50">
+                  <div className="flex items-center justify-between mb-4">
+                    <div>
+                      <p className="font-bold text-gray-800">Booking: {booking.bookingId}</p>
+                      <p className="text-gray-600 text-sm">Customer: {booking.customer?.name}</p>
+                      <p className="text-gray-600 text-sm">Amount: ₹{booking.pricing?.finalAmount}</p>
+                      <p className="text-red-600 font-bold">Commission Due: ₹{booking.payment?.commissionAmount}</p>
+                    </div>
+                  </div>
+
+                  {/* Payment Options */}
+                  <div className="space-y-2">
+                    <p className="font-semibold text-gray-700">Pay Commission Via:</p>
+                    <div className="flex flex-wrap gap-3">
+                      <button
+                        onClick={async () => {
+                          try {
+                            await commissionAPI.payCommission({
+                              bookingId: booking._id,
+                              paymentMethod: 'upi'
+                            });
+                            toast.success('Commission payment recorded!');
+                            fetchCommission();
+                          } catch (error) {
+                            toast.error('Failed to record payment');
+                          }
+                        }}
+                        className="px-4 py-2 bg-blue-500 text-white rounded-lg font-medium hover:bg-blue-600"
+                      >
+                        📱 UPI Transfer
+                      </button>
+                      <button
+                        onClick={async () => {
+                          try {
+                            await commissionAPI.payCommission({
+                              bookingId: booking._id,
+                              paymentMethod: 'next_booking'
+                            });
+                            toast.success('Will be deducted from next booking!');
+                            fetchCommission();
+                          } catch (error) {
+                            toast.error('Failed to record payment');
+                          }
+                        }}
+                        className="px-4 py-2 bg-green-500 text-white rounded-lg font-medium hover:bg-green-600"
+                      >
+                        💳 Next Booking
+                      </button>
+                      <button
+                        onClick={async () => {
+                          try {
+                            await commissionAPI.payCommission({
+                              bookingId: booking._id,
+                              paymentMethod: 'monthly'
+                            });
+                            toast.success('Added to monthly settlement!');
+                            fetchCommission();
+                          } catch (error) {
+                            toast.error('Failed to record payment');
+                          }
+                        }}
+                        className="px-4 py-2 bg-purple-500 text-white rounded-lg font-medium hover:bg-purple-600"
+                      >
+                        📅 Monthly Settlement
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* No Pending */}
+        {commission?.pendingBookings?.length === 0 && (
+          <div className="text-center py-8 bg-green-50 rounded-xl">
+            <div className="text-5xl mb-3">✅</div>
+            <h3 className="text-xl font-bold text-green-800">All Clear!</h3>
+            <p className="text-green-600">No pending commissions</p>
+          </div>
+        )}
+      </div>
+    )}
+  </div>
+)}
             </div>
           </div>
         </div>

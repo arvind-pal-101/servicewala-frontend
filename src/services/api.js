@@ -104,7 +104,7 @@ export const bookingAPI = {
   startService: (id) => api.put(`/bookings/${id}/start`),
   completeBooking: (id, data) => api.put(`/bookings/${id}/complete`, data),
   cancelBooking: (id) => api.put(`/bookings/${id}/cancel`),
-  confirmCashPayment: (id) => api.put(`/bookings/${id}/confirm-cash`)
+  confirmCashPayment: (id, data) => api.put(`/bookings/${id}/confirm-cash`, data)
 };
 
 // Image Upload APIs
@@ -129,6 +129,14 @@ export const paymentAPI = {
   verifyPayment: (data) => api.post('/payments/verify', data),
   getPaymentDetails: (bookingId) => api.get(`/payments/${bookingId}`),
   refundPayment: (bookingId) => api.post(`/payments/refund/${bookingId}`)
+};
+
+// Commission APIs
+export const commissionAPI = {
+  getMyCommission: () => api.get('/commission/my'),
+  payCommission: (data) => api.post('/commission/pay', data),
+  getAllCommissions: () => api.get('/commission/all'),
+  adminCollectCommission: (data) => api.post('/commission/collect', data)
 };
 
 export default api;

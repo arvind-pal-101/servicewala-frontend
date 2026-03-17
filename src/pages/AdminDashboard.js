@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
-import api from '../services/api';
+import api, { commissionAPI } from '../services/api';
 
 function AdminDashboard() {
   const navigate = useNavigate();
@@ -18,6 +18,7 @@ function AdminDashboard() {
   const [workers, setWorkers] = useState([]);
   const [bookings, setBookings] = useState([]);
   const [categories, setCategories] = useState([]);
+  const [commissionData, setCommissionData] = useState(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -57,6 +58,9 @@ function AdminDashboard() {
       // Fetch categories
       const categoriesRes = await api.get('/categories');
       setCategories(categoriesRes.data.data);
+      // Fetch commission data
+      const commissionRes = await commissionAPI.getAllCommissions();
+      setCommissionData(commissionRes.data.data);
 
     } catch (error) {
       console.error('Error fetching admin data:', error);
@@ -246,6 +250,16 @@ function AdminDashboard() {
               >
                 🏷️ Categories ({categories.length})
               </button>
+              <button
+  onClick={() => setActiveTab('commission')}
+  className={`px-6 py-4 font-semibold transition-colors min-w-[150px] ${
+    activeTab === 'commission'
+      ? 'bg-purple-600 text-white'
+      : 'text-gray-600 hover:bg-gray-50'
+  }`}
+>
+  💰 Commission
+</button>
             </div>
           </div>
 
@@ -570,6 +584,148 @@ function AdminDashboard() {
                 </div>
               </div>
             )}
+            {/* Commission Tab */}
+{activeTab === 'commission' && (
+  <div>
+    <h2 className="text-2xl font-bold text-gray-800 mb-6">Commission Management</h2>
+
+    {!commissionData?.commissionEnabled ? (
+      <div className="text-center py-12 bg-yellow-50 rounded-xl">
+        <div className="text-6xl mb-4">⚠️</div>
+        <h3 className="text-2xl font-bold text-yellow-800 mb-2">Commission Disabled</h3>
+        <p className="text-yellow-700">Commission system is currently OFF.</p>
+        <p className="text-yellow-600 text-sm mt-2">Render me COMMISSION_ENABLED=true karo to enable karne ke liye.</p>
+      </div>
+    ) : (
+      <div className="space-y-6">
+
+        {/* Summary Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="bg-red-50 rounded-xl p-6 text-center">
+            <p className="text-gray-600 text-sm mb-1">Total Pending</p>
+            <p className="text-3xl font-bold text-red-600">
+              ₹{commissionData?.summary?.totalPending || 0}
+            </p>
+          </div>
+          <div className="bg-green-50 rounded-xl p-6 text-center">
+            <p className="text-gray-600 text-sm mb-1">Total Collected</p>
+            <p className="text-3xl font-bold text-green-600">
+              ₹{commissionData?.summary?.totalCollected || 0}
+            </p>
+          </div>
+          <div className="bg-blue-50 rounded-xl p-6 text-center">
+            <p className="text-gray-600 text-sm mb-1">Commission Rate</p>
+            <p className="text-3xl font-bold text-blue-600">
+              {commissionData?.commissionRate || 0}%
+            </p>
+          </div>
+        </div>
+
+        {/* Workers With Pending */}
+        {commissionData?.workersWithPending?.length > 0 && (
+          <div>
+            <h3 className="text-xl font-bold text-gray-800 mb-4">⏳ Workers With Pending Commission</h3>
+            <div className="overflow-x-auto">
+              <table className="min-w-full divide-y divide-gray-200">
+                <thead className="bg-gray-50">
+                  <tr>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Worker</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Pending Amount</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Pending Count</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
+                  </tr>
+                </thead>
+                <tbody className="bg-white divide-y divide-gray-200">
+                  {commissionData.workersWithPending.map((worker) => (
+                    <tr key={worker._id} className="hover:bg-gray-50">
+                      <td className="px-6 py-4">
+                        <div>
+                          <p className="font-medium text-gray-900">{worker.name}</p>
+                          <p className="text-sm text-gray-500">{worker.phone}</p>
+                        </div>
+                      </td>
+                      <td className="px-6 py-4">
+                        <span className="font-bold text-red-600">
+                          ₹{worker.commission?.totalPending || 0}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4">
+                        <span className="font-bold">
+                          {worker.commission?.pendingCount || 0}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4">
+                        {worker.commission?.isBlocked ? (
+                          <span className="px-3 py-1 bg-red-100 text-red-800 rounded-full text-xs font-medium">
+                            🚫 Blocked
+                          </span>
+                        ) : (
+                          <span className="px-3 py-1 bg-yellow-100 text-yellow-800 rounded-full text-xs font-medium">
+                            ⏳ Pending
+                          </span>
+                        )}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
+
+        {/* Recent Transactions */}
+        {commissionData?.recentTransactions?.length > 0 && (
+          <div>
+            <h3 className="text-xl font-bold text-gray-800 mb-4">📋 Recent Transactions</h3>
+            <div className="space-y-3">
+              {commissionData.recentTransactions.map((transaction) => (
+                <div key={transaction._id} className="border border-gray-200 rounded-xl p-4">
+                  <div className="flex justify-between items-center">
+                    <div>
+                      <p className="font-bold text-gray-800">
+                        Worker: {transaction.worker?.name}
+                      </p>
+                      <p className="text-sm text-gray-600">
+                        Customer: {transaction.customer?.name}
+                      </p>
+                      <p className="text-sm text-gray-600">
+                        Method: {transaction.method} |
+                        Amount: ₹{transaction.amount}
+                      </p>
+                    </div>
+                    <div className="text-right">
+                      <p className="font-bold text-purple-600">
+                        Commission: ₹{transaction.commissionAmount}
+                      </p>
+                      <span className={`px-3 py-1 rounded-full text-xs font-medium ${
+                        transaction.commissionStatus === 'collected'
+                          ? 'bg-green-100 text-green-800'
+                          : transaction.commissionStatus === 'pending'
+                          ? 'bg-yellow-100 text-yellow-800'
+                          : 'bg-gray-100 text-gray-800'
+                      }`}>
+                        {transaction.commissionStatus}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* No Data */}
+        {commissionData?.workersWithPending?.length === 0 && (
+          <div className="text-center py-8 bg-green-50 rounded-xl">
+            <div className="text-5xl mb-3">✅</div>
+            <h3 className="text-xl font-bold text-green-800">All Clear!</h3>
+            <p className="text-green-600">No pending commissions from any worker</p>
+          </div>
+        )}
+      </div>
+    )}
+  </div>
+)}
           </div>
         </div>
       </div>
