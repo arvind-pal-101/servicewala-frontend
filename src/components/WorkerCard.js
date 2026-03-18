@@ -50,7 +50,7 @@ function WorkerCard({ worker }) {
         
         {/* Name & Category */}
         <div className="mb-4">
-          <h3 className="text-2xl font-bold text-gray-800 mb-1">{worker.name}</h3>
+          <h3 className="text-xl sm:text-2xl font-bold text-gray-800 mb-1">{worker.name}</h3>
           <p className="text-gray-600 flex items-center space-x-2">
             <span className="text-xl">{worker.category?.icon || '🔧'}</span>
             <span>{worker.category?.name || 'Service Provider'}</span>
@@ -100,20 +100,20 @@ function WorkerCard({ worker }) {
         </div>
 
         {/* Action Buttons */}
-        <div className="grid grid-cols-2 gap-3">
-          <button
-            onClick={handleViewProfile}
-            className="px-4 py-3 border-2 border-primary text-primary rounded-lg font-semibold hover:bg-primary hover:text-white transition-all"
-          >
-            View Profile
-          </button>
-          <button
-            onClick={handleBookNow}
-            className="px-4 py-3 bg-gradient-to-r from-primary to-blue-600 text-white rounded-lg font-semibold hover:shadow-xl transform hover:scale-105 transition-all btn-ripple"
-          >
-            Book Now
-          </button>
-        </div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+  <button
+    onClick={handleViewProfile}
+    className="px-4 py-2 sm:py-3 border-2 border-primary text-primary rounded-lg font-semibold hover:bg-primary hover:text-white transition-all text-sm sm:text-base"
+  >
+    View Profile
+  </button>
+  <button
+    onClick={handleBookNow}
+    className="px-4 py-2 sm:py-3 bg-gradient-to-r from-primary to-blue-600 text-white rounded-lg font-semibold hover:shadow-xl transform hover:scale-105 transition-all btn-ripple text-sm sm:text-base"
+  >
+    Book Now
+  </button>
+</div>
       </div>
     </div>
   );

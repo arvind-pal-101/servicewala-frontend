@@ -63,7 +63,7 @@ function Home() {
 
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-20 pb-24">
           <div className="text-center animate-slide-up">
-            <h1 className="text-5xl md:text-6xl font-bold mb-6">
+            <h1 className="text-3xl sm:text-5xl md:text-6xl font-bold mb-6">
               <span className="gradient-text">Find Trusted Workers</span>
               <br />
               <span className="text-gray-800">Near You</span>
@@ -120,7 +120,7 @@ function Home() {
       <section className="py-16 px-4">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-12">
-            <h2 className="text-4xl font-bold text-gray-800 mb-4">Popular Services</h2>
+            <h2 className="text-2xl sm:text-4xl font-bold text-gray-800 mb-4">Popular Services</h2>
             <p className="text-gray-600 text-lg">Choose from our wide range of services</p>
           </div>
 
@@ -134,9 +134,9 @@ function Home() {
                 <div className="text-6xl mb-4 group-hover:scale-110 transition-transform">
                   {category.icon}
                 </div>
-                <h3 className="text-xl font-semibold text-gray-800 mb-2">
-                  {category.name}
-                </h3>
+                <h3 className="text-base sm:text-xl font-semibold text-gray-800 mb-2">
+  {category.name}
+</h3>
                 {/* Only show worker count if greater than 0 */}
                 {category.workerCount > 0 && (
                   <p className="text-gray-500 text-sm">
@@ -156,7 +156,7 @@ function Home() {
       <section className="py-16 px-4 bg-gradient-to-r from-blue-50 to-purple-50">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-12">
-            <h2 className="text-4xl font-bold text-gray-800 mb-4">How It Works</h2>
+            <h2 className="text-2xl sm:text-4xl font-bold text-gray-800 mb-4">How It Works</h2>
             <p className="text-gray-600 text-lg">Get your work done in 3 simple steps</p>
           </div>
 

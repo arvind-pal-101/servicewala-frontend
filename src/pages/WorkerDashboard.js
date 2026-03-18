@@ -183,7 +183,7 @@ const [commission, setCommission] = useState(null);
           
           {/* Header */}
           <div className="mb-8">
-            <h1 className="text-4xl font-bold text-gray-800 mb-2">
+            <h1 className="text-2xl sm:text-4xl font-bold text-gray-800 mb-2">
               Welcome back, {worker?.name || 'Worker'}! 👨‍🔧
             </h1>
             <p className="text-gray-600">Manage your bookings and earnings</p>
@@ -235,14 +235,14 @@ const [commission, setCommission] = useState(null);
 
           {/* Availability Toggle */}
           <div className="bg-white rounded-2xl shadow-lg p-6 mb-8">
-            <div className="flex items-center justify-between">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
               <div>
                 <h3 className="text-xl font-bold text-gray-800 mb-1">Availability Status</h3>
                 <p className="text-gray-600">Let customers know if you're available for new bookings</p>
               </div>
               <button
                 onClick={toggleAvailability}
-                className={`px-8 py-4 rounded-xl font-semibold text-lg transition-all ${
+                className={`w-full sm:w-auto px-8 py-4 rounded-xl font-semibold text-lg transition-all ${
                   worker?.availability?.isAvailable
                     ? 'bg-green-500 text-white hover:bg-green-600'
                     : 'bg-gray-300 text-gray-700 hover:bg-gray-400'
@@ -258,10 +258,10 @@ const [commission, setCommission] = useState(null);
             
             {/* Tab Headers */}
             <div className="border-b border-gray-200">
-              <div className="flex">
+              <div className="flex overflow-x-auto">
                 <button
                   onClick={() => setActiveTab('bookings')}
-                  className={`flex-1 px-6 py-4 font-semibold transition-colors ${
+                  className={`min-w-[120px] px-6 py-4 font-semibold transition-colors ${
                     activeTab === 'bookings'
                       ? 'bg-primary text-white'
                       : 'text-gray-600 hover:bg-gray-50'
@@ -271,7 +271,7 @@ const [commission, setCommission] = useState(null);
                 </button>
                 <button
                   onClick={() => setActiveTab('images')}
-                  className={`flex-1 px-6 py-4 font-semibold transition-colors ${
+                  className={`min-w-[120px] px-6 py-4 font-semibold transition-colors ${
                     activeTab === 'images'
                       ? 'bg-primary text-white'
                       : 'text-gray-600 hover:bg-gray-50'
@@ -281,7 +281,7 @@ const [commission, setCommission] = useState(null);
                 </button>
                 <button
                   onClick={() => setActiveTab('profile')}
-                  className={`flex-1 px-6 py-4 font-semibold transition-colors ${
+                  className={`min-w-[120px] px-6 py-4 font-semibold transition-colors ${
                     activeTab === 'profile'
                       ? 'bg-primary text-white'
                       : 'text-gray-600 hover:bg-gray-50'
@@ -291,7 +291,7 @@ const [commission, setCommission] = useState(null);
                 </button>
                 <button
   onClick={() => setActiveTab('commission')}
-  className={`flex-1 px-6 py-4 font-semibold transition-colors ${
+  className={`min-w-[120px] px-6 py-4 font-semibold transition-colors ${
     activeTab === 'commission'
       ? 'bg-primary text-white'
       : 'text-gray-600 hover:bg-gray-50'

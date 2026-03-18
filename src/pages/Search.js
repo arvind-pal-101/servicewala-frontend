@@ -116,7 +116,7 @@ function Search() {
           
           {/* Header */}
           <div className="mb-8">
-            <h1 className="text-4xl font-bold gradient-text mb-2">Find Local Workers</h1>
+            <h1 className="text-2xl sm:text-4xl font-bold gradient-text mb-2">Find Local Workers</h1>
             <p className="text-gray-600">Discover skilled professionals in your area</p>
           </div>
 
@@ -187,20 +187,20 @@ function Search() {
             </div>
 
             {/* Action Buttons */}
-            <div className="flex space-x-3">
-              <button
-                onClick={handleSearch}
-                className="flex-1 px-6 py-3 bg-gradient-to-r from-primary to-blue-600 text-white rounded-lg font-semibold hover:shadow-xl transition-all"
-              >
-                🔍 Search
-              </button>
-              <button
-                onClick={handleReset}
-                className="px-6 py-3 border-2 border-gray-300 text-gray-700 rounded-lg font-semibold hover:bg-gray-50 transition-colors"
-              >
-                Reset
-              </button>
-            </div>
+            <div className="flex flex-col sm:flex-row gap-3">
+  <button
+    onClick={handleSearch}
+    className="w-full sm:flex-1 px-6 py-3 bg-gradient-to-r from-primary to-blue-600 text-white rounded-lg font-semibold hover:shadow-xl transition-all"
+  >
+    🔍 Search
+  </button>
+  <button
+    onClick={handleReset}
+    className="w-full sm:w-auto px-6 py-3 border-2 border-gray-300 text-gray-700 rounded-lg font-semibold hover:bg-gray-50 transition-colors"
+  >
+    Reset
+  </button>
+</div>
           </div>
           <Helmet>
   <title>Find Service Providers - ServiceWala</title>

@@ -113,12 +113,12 @@ function Footer() {
             <p className="text-gray-400 text-sm">
               © {currentYear} ServiceBabu. All rights reserved.
             </p>
-            <div className="flex space-x-6 text-sm">
-              <Link to="/terms" className="hover:text-white transition-colors">Terms of Service</Link>
-              <Link to="/privacy" className="hover:text-white transition-colors">Privacy Policy</Link>
-              <Link to="/refund-policy" className="hover:text-white transition-colors">Refund Policy</Link>
-              <Link to="/contact" className="hover:text-primary transition-colors">Contact</Link>
-            </div>
+            <div className="flex flex-wrap gap-x-6 gap-y-2 justify-center md:justify-end text-sm">
+  <Link to="/terms" className="hover:text-white transition-colors">Terms of Service</Link>
+  <Link to="/privacy" className="hover:text-white transition-colors">Privacy Policy</Link>
+  <Link to="/refund-policy" className="hover:text-white transition-colors">Refund Policy</Link>
+  <Link to="/contact" className="hover:text-primary transition-colors">Contact</Link>
+</div>
           </div>
         </div>
       </div>

@@ -190,21 +190,21 @@ function BookingDetails() {
               <span>Back</span>
             </button>
             
-            <div className="flex items-center justify-between">
-              <div>
-                <h1 className="text-4xl font-bold text-gray-800 mb-2">
-                  Booking Details
-                </h1>
-                <p className="text-gray-600">Booking ID: {booking.bookingId || booking._id}</p>
-              </div>
-              <div className={`px-6 py-3 rounded-xl border-2 font-bold text-lg ${getStatusColor(booking.status)}`}>
-                {getStatusIcon(booking.status)} {booking.status.toUpperCase()}
-              </div>
-            </div>
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+  <div>
+    <h1 className="text-2xl sm:text-4xl font-bold text-gray-800 mb-2">
+      Booking Details
+    </h1>
+    <p className="text-gray-600 text-sm sm:text-base">Booking ID: {booking.bookingId || booking._id}</p>
+  </div>
+  <div className={`px-4 py-2 sm:px-6 sm:py-3 rounded-xl border-2 font-bold text-sm sm:text-lg self-start sm:self-auto ${getStatusColor(booking.status)}`}>
+    {getStatusIcon(booking.status)} {booking.status.toUpperCase()}
+  </div>
+</div>
           </div>
 
           {/* Main Content */}
-          <div className="grid md:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             
             {/* Left Column - Booking Info */}
             <div className="md:col-span-2 space-y-6">
