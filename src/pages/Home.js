@@ -46,11 +46,15 @@ function Home() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-orange-50">
       <Helmet>
-        <title>ServiceBabu - Find Local Service Providers in Ayodhya</title>
-        <meta name="description" content="Connect with verified plumbers, electricians, carpenters, and home service professionals in Ayodhya." />
-        <meta name="keywords" content="home services Ayodhya, plumber Ayodhya, electrician Ayodhya, carpenter, local workers" />
-        <link rel="canonical" href="https://servicebabu.in/" />
-      </Helmet>
+  <title>ServiceBabu - Verified Home Services in Ayodhya | Plumber, Electrician, Carpenter</title>
+  <meta name="description" content="Book verified plumbers, electricians, carpenters and home service professionals in Ayodhya. Trusted, affordable, fast service at your doorstep. No hidden charges." />
+  <meta name="keywords" content="home services Ayodhya, plumber Ayodhya, electrician Ayodhya, carpenter Ayodhya, AC repair Ayodhya, painter Ayodhya, ServiceBabu, ghar ka kaam Ayodhya" />
+  <meta property="og:title" content="ServiceBabu - Verified Home Services in Ayodhya" />
+  <meta property="og:description" content="Book verified plumbers, electricians, carpenters in Ayodhya. Trusted, affordable, fast." />
+  <meta property="og:url" content="https://servicebabu.in/" />
+  <meta property="og:type" content="website" />
+  <link rel="canonical" href="https://servicebabu.in/" />
+</Helmet>
 
       <Navbar />
 
@@ -64,14 +68,15 @@ function Home() {
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-20 pb-24">
           <div className="text-center animate-slide-up">
             <h1 className="text-3xl sm:text-5xl md:text-6xl font-bold mb-6">
-              <span className="gradient-text">Find Trusted Workers</span>
-              <br />
-              <span className="text-gray-800">Near You</span>
-            </h1>
-            <p className="text-xl text-gray-600 mb-8 max-w-2xl mx-auto">
-              Connect with verified local service providers in{' '}
-              <span className="text-primary font-semibold">Ayodhya</span>
-            </p>
+  <span className="gradient-text">Trusted Home Services</span>
+  <br />
+  <span className="text-gray-800">At Your Doorstep</span>
+</h1>
+<p className="text-lg sm:text-xl text-gray-600 mb-8 max-w-2xl mx-auto">
+  Book verified Plumbers, Electricians & Carpenters in{' '}
+  <span className="text-primary font-semibold">Ayodhya</span>{' '}
+  — No hidden charges, Fast service
+</p>
 
             <div className="max-w-2xl mx-auto">
               <div className="glass rounded-2xl p-6 shadow-2xl">
@@ -98,20 +103,24 @@ function Home() {
               </div>
             </div>
 
-            <div className="flex flex-wrap justify-center gap-8 mt-12 text-gray-600">
-              <div className="flex items-center gap-2">
-                <span className="text-2xl">✅</span>
-                <span className="font-medium">Verified Workers</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <span className="text-2xl">⭐</span>
-                <span className="font-medium">Rated by Customers</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <span className="text-2xl">💰</span>
-                <span className="font-medium">Transparent Pricing</span>
-              </div>
-            </div>
+            <div className="flex flex-wrap justify-center gap-4 sm:gap-8 mt-12 text-gray-600">
+  <div className="flex items-center gap-2">
+    <span className="text-xl sm:text-2xl">✅</span>
+    <span className="font-medium text-sm sm:text-base">Verified Workers</span>
+  </div>
+  <div className="flex items-center gap-2">
+    <span className="text-xl sm:text-2xl">⭐</span>
+    <span className="font-medium text-sm sm:text-base">Customer Ratings</span>
+  </div>
+  <div className="flex items-center gap-2">
+    <span className="text-xl sm:text-2xl">💰</span>
+    <span className="font-medium text-sm sm:text-base">No Hidden Charges</span>
+  </div>
+  <div className="flex items-center gap-2">
+    <span className="text-xl sm:text-2xl">🚀</span>
+    <span className="font-medium text-sm sm:text-base">Fast Service</span>
+  </div>
+</div>
           </div>
         </div>
       </section>
