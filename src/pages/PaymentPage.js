@@ -65,12 +65,28 @@ function PaymentPage() {
 
       // Razorpay options
       const options = {
-        key: keyId,
-        amount: orderAmount,
-        currency: currency,
-        name: 'ServiceWala',
-        description: `Payment for ${booking.category?.name} service`,
-        order_id: orderId,
+  key: keyId,
+  amount: orderAmount,
+  currency: currency,
+  name: 'ServiceBabu',
+  description: `Payment for ${booking.category?.name} service`,
+  order_id: orderId,
+  config: {
+    display: {
+      blocks: {
+        upi: {
+          name: 'Pay via UPI — FREE',
+          instruments: [
+            { method: 'upi' }
+          ]
+        }
+      },
+      sequence: ['block.upi'],
+      preferences: {
+        show_default_blocks: false
+      }
+    }
+  },
         handler: async function (response) {
           try {
             // Verify payment
@@ -236,9 +252,9 @@ function PaymentPage() {
                       💳
                     </div>
                     <div>
-                      <h3 className="text-xl font-bold text-gray-800">Pay Online</h3>
-                      <p className="text-gray-600 text-sm">Credit/Debit/UPI/Wallet</p>
-                    </div>
+  <h3 className="text-xl font-bold text-gray-800">Pay via UPI — FREE 🎉</h3>
+  <p className="text-gray-600 text-sm">GPay, PhonePe, Paytm, BHIM & more</p>
+</div>
                   </div>
                   <input
                     type="radio"
@@ -248,11 +264,19 @@ function PaymentPage() {
                   />
                 </div>
                 
-                <div className="flex items-center space-x-2 text-sm text-gray-600">
-                  <span>✅ Instant confirmation</span>
-                  <span>•</span>
-                  <span>🔒 100% Secure</span>
-                </div>
+                <div className="space-y-2">
+  <div className="flex items-center space-x-2 text-sm text-gray-600">
+    <span>✅ Zero transaction fee</span>
+    <span>•</span>
+    <span>🔒 100% Secure</span>
+  </div>
+  <div className="flex flex-wrap gap-2 mt-2">
+    <span className="px-3 py-1 bg-blue-50 rounded-full text-xs font-medium text-blue-700">GPay</span>
+    <span className="px-3 py-1 bg-purple-50 rounded-full text-xs font-medium text-purple-700">PhonePe</span>
+    <span className="px-3 py-1 bg-blue-50 rounded-full text-xs font-medium text-blue-700">Paytm</span>
+    <span className="px-3 py-1 bg-orange-50 rounded-full text-xs font-medium text-orange-700">BHIM</span>
+  </div>
+</div>
               </div>
 
               {/* Cash Payment */}
