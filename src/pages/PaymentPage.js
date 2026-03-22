@@ -134,20 +134,22 @@ function PaymentPage() {
   };
 
   const handleCashPayment = async () => {
-    try {
-      setProcessing(true);
-      
-      // Update booking payment method to cash
-      toast.success('Cash payment selected! Worker will collect payment after service.');
-      navigate(`/booking/${bookingId}`);
-      
-    } catch (error) {
-      console.error('Error:', error);
-      toast.error('Failed to update payment method');
-    } finally {
-      setProcessing(false);
-    }
-  };
+  try {
+    setProcessing(true);
+    
+    // API call to set payment method to cash
+    await paymentAPI.selectCashPayment(bookingId);
+    
+    toast.success('Cash payment selected! Worker will collect payment after service.');
+    navigate(`/booking/${bookingId}`);
+    
+  } catch (error) {
+    console.error('Error:', error);
+    toast.error('Failed to update payment method');
+  } finally {
+    setProcessing(false);
+  }
+};
 
   const handlePayment = () => {
     if (paymentMethod === 'online') {

@@ -128,7 +128,11 @@ export const paymentAPI = {
   createOrder: (data) => api.post('/payments/create-order', data),
   verifyPayment: (data) => api.post('/payments/verify', data),
   getPaymentDetails: (bookingId) => api.get(`/payments/${bookingId}`),
-  refundPayment: (bookingId) => api.post(`/payments/refund/${bookingId}`)
+  refundPayment: (bookingId) => api.post(`/payments/refund/${bookingId}`),
+  selectCashPayment: (bookingId) => api.post(`/payments/cash/${bookingId}`),
+  // Worker Payout APIs - NEW!
+  getPendingPayouts: () => api.get('/payments/pending-payouts'),
+  markWorkerPaid: (bookingId, data) => api.post(`/payments/mark-worker-paid/${bookingId}`, data)
 };
 
 // Commission APIs

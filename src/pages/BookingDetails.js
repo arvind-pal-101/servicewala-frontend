@@ -73,27 +73,28 @@ function BookingDetails() {
     }
   };
   const handleConfirmCash = async () => {
-  const amountInput = prompt(
-    `Enter the cash amount received from customer (₹):`
-  );
-  
-  if (!amountInput) return;
-  
-  const amount = parseInt(amountInput);
-  if (isNaN(amount) || amount <= 0) {
-    toast.error('Please enter valid amount');
+  // Get the final amount from booking (already set during service completion)
+  const finalAmount = booking?.pricing?.finalAmount;
+
+  if (!finalAmount) {
+    toast.error('Unable to get booking amount. Please complete service first.');
     return;
   }
 
-  const confirm = window.confirm(
-    `Confirm that you received ₹${amount} in CASH from the customer?`
+  // Simple Yes/No confirmation with the FIXED amount
+  const confirmed = window.confirm(
+    `Confirm you received ₹${finalAmount} cash from customer?\n\n` +
+    `Service Amount: ₹${finalAmount}\n` +
+    `Click OK to confirm receipt of cash payment.`
   );
-  
-  if (!confirm) return;
+
+  if (!confirmed) {
+    return;
+  }
 
   try {
-    await bookingAPI.confirmCashPayment(id, { finalAmount: amount });
-    toast.success('💵 Cash payment confirmed!');
+    await bookingAPI.confirmCashPayment(id, { finalAmount: finalAmount });  // ✅ Uses correct amount
+    toast.success(`💵 Cash payment confirmed! ₹${finalAmount} received`);
     fetchBooking();
   } catch (error) {
     toast.error('Failed to confirm cash payment');
@@ -436,9 +437,10 @@ function BookingDetails() {
                         🎉 Complete Service
                       </button>
                     )}
-                    {/* CONFIRM CASH PAYMENT - For completed bookings with pending payment */}
+                    {/* CONFIRM CASH PAYMENT - Only for CASH payments */}
 {booking.status === 'completed' && 
- booking.payment?.status === 'pending' && (
+ booking.payment?.status === 'pending' &&
+ booking.payment?.method === 'cash' && (
   <button
     onClick={handleConfirmCash}
     className="w-full px-6 py-3 bg-gradient-to-r from-green-500 to-green-600 text-white rounded-lg font-semibold hover:shadow-xl transition-all transform hover:scale-105"
@@ -447,7 +449,21 @@ function BookingDetails() {
   </button>
 )}
 
-                    {['pending', 'accepted'].includes(booking.status) && (
+{/* WAITING FOR ONLINE PAYMENT */}
+{booking.status === 'completed' && 
+ booking.payment?.status === 'pending' &&
+ booking.payment?.method === 'online' && (
+  <div className="w-full px-6 py-3 bg-blue-50 border-2 border-blue-200 rounded-lg">
+    <p className="text-blue-800 font-semibold text-center mb-1">
+      ⏳ Waiting for Online Payment
+    </p>
+    <p className="text-blue-700 text-sm text-center">
+      Customer will complete payment of ₹{booking.pricing?.finalAmount} online
+    </p>
+  </div>
+)}
+
+{['pending', 'accepted'].includes(booking.status) && (
                       <button
                         onClick={handleCancel}
                         className="w-full px-6 py-3 border-2 border-red-300 text-red-600 rounded-lg font-semibold hover:bg-red-50 transition-colors"

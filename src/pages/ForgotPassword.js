@@ -7,27 +7,30 @@ import { toast } from 'react-toastify';
 
 function ForgotPassword() {
   const navigate = useNavigate();
-  const [phone, setPhone] = useState('');
+  const [identifier, setIdentifier] = useState('');  // ← CHANGED from 'phone'
   const [loading, setLoading] = useState(false);
+  const [emailSent, setEmailSent] = useState(false);  // ← NEW
+  const [sentToEmail, setSentToEmail] = useState('');  // ← NEW
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (!phone || phone.length !== 10) {
-      toast.error('Please enter valid 10-digit phone number');
+    if (!identifier) {
+      toast.error('Please enter your phone number or email');
       return;
     }
 
     try {
       setLoading(true);
-      const response = await authAPI.forgotPassword({ phone });
+      const response = await authAPI.forgotPassword({ identifier });  // ← CHANGED
       
-      toast.success(response.data.message);
-      toast.info('Check your email inbox!');
-      
-      setTimeout(() => navigate('/login'), 3000);
+      if (response.data.success) {
+        setEmailSent(true);
+        setSentToEmail(response.data.email);  // ← SAVE email from response
+        toast.success('Password reset link sent!');
+      }
     } catch (error) {
-      toast.error(error.response?.data?.message || 'Failed to send reset email');
+      toast.error(error.response?.data?.message || 'Failed to send reset link');
     } finally {
       setLoading(false);
     }
@@ -40,64 +43,99 @@ function ForgotPassword() {
         <div className="max-w-md mx-auto">
           
           <div className="bg-white rounded-2xl shadow-xl p-8">
-            <div className="text-center mb-8">
-              <div className="text-6xl mb-4">🔐</div>
-              <h1 className="text-3xl font-bold text-gray-800 mb-2">
-                Forgot Password?
-              </h1>
-              <p className="text-gray-600">
-                Enter your phone number and we'll send a password reset link to your email
-              </p>
-            </div>
+            
+            {!emailSent ? (
+              <>
+                {/* BEFORE EMAIL SENT */}
+                <div className="text-center mb-8">
+                  <div className="text-6xl mb-4">🔐</div>
+                  <h1 className="text-3xl font-bold text-gray-800 mb-2">
+                    Forgot Password?
+                  </h1>
+                  <p className="text-gray-600">
+                    Enter your phone number or email to reset your password
+                  </p>
+                </div>
 
-            <form onSubmit={handleSubmit} className="space-y-6">
-              
-              <div>
-                <label className="block text-gray-700 font-medium mb-2">
-                  📱 Phone Number
-                </label>
-                <input
-                  type="tel"
-                  value={phone}
-                  onChange={(e) => setPhone(e.target.value.replace(/\D/g, '').slice(0, 10))}
-                  placeholder="Enter 10-digit phone number"
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
-                  maxLength="10"
-                  required
-                />
-                <p className="text-sm text-gray-500 mt-1">
-                  We'll send reset link to your registered email
-                </p>
-              </div>
+                <form onSubmit={handleSubmit} className="space-y-6">
+                  
+                  <div>
+  <label className="block text-gray-700 font-medium mb-2">
+    📱 Phone Number or 📧 Email
+  </label>
+  <input
+    type="text"
+    value={identifier}
+    onChange={(e) => setIdentifier(e.target.value)}
+    placeholder="9876543210 or your@email.com"  // ← CONSISTENT
+    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+    required
+  />
+  <p className="text-sm text-gray-500 mt-2">
+    Reset link will be sent to your registered email
+  </p>
+</div>
 
-              <button
-                type="submit"
-                disabled={loading}
-                className={`w-full py-3 rounded-lg font-semibold text-white transition-all ${
-                  loading
-                    ? 'bg-gray-400 cursor-not-allowed'
-                    : 'bg-primary hover:bg-blue-600'
-                }`}
-              >
-                {loading ? '📧 Sending...' : '📧 Send Reset Link'}
-              </button>
+                  <button
+                    type="submit"
+                    disabled={loading}
+                    className={`w-full py-3 rounded-lg font-semibold text-white transition-all ${
+                      loading
+                        ? 'bg-gray-400 cursor-not-allowed'
+                        : 'bg-primary hover:bg-blue-600'
+                    }`}
+                  >
+                    {loading ? '📧 Sending...' : '📧 Send Reset Link'}
+                  </button>
 
-            </form>
+                </form>
 
-            <div className="mt-6 text-center">
-              <Link 
-                to="/login" 
-                className="text-primary hover:underline font-medium"
-              >
-                ← Back to Login
-              </Link>
-            </div>
-
-            <div className="mt-6 p-4 bg-blue-50 rounded-lg">
-              <p className="text-sm text-gray-600">
-                💡 <strong>Note:</strong> Reset link will be sent to the email registered with this phone number. Link expires in 30 minutes.
-              </p>
-            </div>
+                <div className="mt-6 text-center">
+                  <Link 
+                    to="/login" 
+                    className="text-primary hover:underline font-medium"
+                  >
+                    ← Back to Login
+                  </Link>
+                </div>
+              </>
+            ) : (
+              <>
+                {/* AFTER EMAIL SENT - SUCCESS STATE */}
+                <div className="text-center">
+                  <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <span className="text-green-600 text-4xl">✓</span>
+                  </div>
+                  
+                  <h2 className="text-2xl font-bold text-gray-800 mb-2">Check your email!</h2>
+                  
+                  <p className="text-gray-600 mb-4">
+                    We've sent a password reset link to:
+                  </p>
+                  
+                  <p className="text-xl font-semibold text-primary mb-6">
+                    {sentToEmail}
+                  </p>
+                  
+                  <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
+                    <p className="text-sm text-gray-700 text-left">
+                      📧 <strong>Check your inbox</strong> and spam folder
+                      <br />
+                      ⏰ Link expires in <strong>30 minutes</strong>
+                      <br />
+                      🔒 Click the link to reset your password
+                    </p>
+                  </div>
+                  
+                  <Link
+                    to="/login"
+                    className="inline-block px-6 py-3 bg-primary text-white rounded-lg font-semibold hover:bg-blue-600 transition-colors"
+                  >
+                    Back to Login
+                  </Link>
+                </div>
+              </>
+            )}
 
           </div>
         </div>

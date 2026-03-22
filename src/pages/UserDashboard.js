@@ -356,10 +356,25 @@ function UserDashboard() {
                                   <p>💰 ₹{booking.pricing.estimatedCost.min} - ₹{booking.pricing.estimatedCost.max}</p>
                                 )}
                                 {booking.pricing?.finalAmount && (
-                                  <p className="font-bold text-green-600">
-                                    ✅ Final Amount: ₹{booking.pricing.finalAmount}
-                                  </p>
-                                )}
+  <p className="font-bold text-green-600">
+    ✅ Final Amount: ₹{booking.pricing.finalAmount}
+  </p>
+)}
+
+{/* PAYMENT STATUS - NEW CODE */}
+{booking.status === 'completed' && booking.pricing?.finalAmount && (
+  <p className="mt-1">
+    {booking.payment?.status === 'completed' ? (
+      <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-semibold bg-green-100 text-green-700">
+        ✅ Payment Completed
+      </span>
+    ) : (
+      <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-semibold bg-yellow-100 text-yellow-700">
+        ⏳ Payment Pending - ₹{booking.pricing.finalAmount}
+      </span>
+    )}
+  </p>
+)}
                               </div>
                             </div>
                           </div>

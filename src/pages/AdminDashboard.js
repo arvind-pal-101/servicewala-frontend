@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
-import api, { commissionAPI } from '../services/api';
+import api, { commissionAPI, paymentAPI } from '../services/api';
 
 function AdminDashboard() {
   const navigate = useNavigate();
@@ -19,6 +19,7 @@ function AdminDashboard() {
   const [bookings, setBookings] = useState([]);
   const [categories, setCategories] = useState([]);
   const [commissionData, setCommissionData] = useState(null);
+  const [pendingPayouts, setPendingPayouts] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -58,9 +59,14 @@ function AdminDashboard() {
       // Fetch categories
       const categoriesRes = await api.get('/categories');
       setCategories(categoriesRes.data.data);
+
       // Fetch commission data
       const commissionRes = await commissionAPI.getAllCommissions();
       setCommissionData(commissionRes.data.data);
+
+      // Fetch pending payouts
+      const payoutsRes = await paymentAPI.getPendingPayouts();
+      setPendingPayouts(payoutsRes.data.data);
 
     } catch (error) {
       console.error('Error fetching admin data:', error);
@@ -71,14 +77,14 @@ function AdminDashboard() {
   };
 
   const handleVerifyWorker = async (workerId) => {
-  try {
-    await api.put(`/admin/workers/${workerId}/verify`, { status: 'approved' });
-    toast.success('Worker verified successfully! ✅');
-    fetchAllData();
-  } catch (error) {
-    toast.error('Failed to verify worker');
-  }
-};
+    try {
+      await api.put(`/admin/workers/${workerId}/verify`, { status: 'approved' });
+      toast.success('Worker verified successfully! ✅');
+      fetchAllData();
+    } catch (error) {
+      toast.error('Failed to verify worker');
+    }
+  };
 
   const handleRejectWorker = async (workerId) => {
     const reason = prompt('Reason for rejection:');
@@ -100,6 +106,37 @@ function AdminDashboard() {
       fetchAllData();
     } catch (error) {
       toast.error('Failed to update user status');
+    }
+  };
+
+  const handleToggleWorkerStatus = async (workerId, currentStatus) => {
+    try {
+      await api.put(`/admin/workers/${workerId}/toggle-status`, { isActive: !currentStatus });
+      toast.success(currentStatus ? 'Worker deactivated' : 'Worker activated');
+      fetchAllData();
+    } catch (error) {
+      toast.error('Failed to update worker status');
+    }
+  };
+
+  const handleMarkPaid = async (bookingId, workerName, amount) => {
+    const payoutMethod = prompt('Payment method (upi/bank_transfer):') || 'upi';
+    const payoutReference = prompt('Enter UPI transaction ID or reference:');
+    
+    if (!payoutReference) {
+      toast.error('Transaction reference is required');
+      return;
+    }
+
+    try {
+      await paymentAPI.markWorkerPaid(bookingId, {
+        payoutMethod,
+        payoutReference
+      });
+      toast.success(`✅ Payment marked as paid for ${workerName} - ₹${amount}`);
+      fetchAllData();
+    } catch (error) {
+      toast.error('Failed to mark payment as paid');
     }
   };
 
@@ -251,15 +288,30 @@ function AdminDashboard() {
                 🏷️ Categories ({categories.length})
               </button>
               <button
-  onClick={() => setActiveTab('commission')}
-  className={`px-6 py-4 font-semibold transition-colors min-w-[150px] ${
-    activeTab === 'commission'
-      ? 'bg-purple-600 text-white'
-      : 'text-gray-600 hover:bg-gray-50'
-  }`}
->
-  💰 Commission
-</button>
+                onClick={() => setActiveTab('commission')}
+                className={`px-6 py-4 font-semibold transition-colors min-w-[150px] ${
+                  activeTab === 'commission'
+                    ? 'bg-purple-600 text-white'
+                    : 'text-gray-600 hover:bg-gray-50'
+                }`}
+              >
+                💰 Commission
+              </button>
+              <button
+                onClick={() => setActiveTab('payouts')}
+                className={`px-6 py-4 font-semibold transition-colors min-w-[150px] ${
+                  activeTab === 'payouts'
+                    ? 'bg-purple-600 text-white'
+                    : 'text-gray-600 hover:bg-gray-50'
+                }`}
+              >
+                💸 Pending Payouts
+                {pendingPayouts.length > 0 && (
+                  <span className="ml-2 px-2 py-1 bg-red-500 text-white rounded-full text-xs">
+                    {pendingPayouts.length}
+                  </span>
+                )}
+              </button>
             </div>
           </div>
 
@@ -442,7 +494,7 @@ function AdminDashboard() {
                             )}
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap text-sm">
-                            {worker.verification?.status === 'pending' && (
+                            {worker.verification?.status === 'pending' ? (
                               <div className="flex space-x-2">
                                 <button
                                   onClick={() => handleVerifyWorker(worker._id)}
@@ -457,7 +509,18 @@ function AdminDashboard() {
                                   ❌ Reject
                                 </button>
                               </div>
-                            )}
+                            ) : worker.verification?.isVerified ? (
+                              <button
+                                onClick={() => handleToggleWorkerStatus(worker._id, worker.isActive)}
+                                className={`px-3 py-1 rounded ${
+                                  worker.isActive
+                                    ? 'bg-red-500 text-white hover:bg-red-600'
+                                    : 'bg-green-500 text-white hover:bg-green-600'
+                                }`}
+                              >
+                                {worker.isActive ? '🚫 Deactivate' : '✅ Activate'}
+                              </button>
+                            ) : null}
                           </td>
                         </tr>
                       ))}
@@ -584,148 +647,249 @@ function AdminDashboard() {
                 </div>
               </div>
             )}
+
             {/* Commission Tab */}
-{activeTab === 'commission' && (
-  <div>
-    <h2 className="text-2xl font-bold text-gray-800 mb-6">Commission Management</h2>
+            {activeTab === 'commission' && (
+              <div>
+                <h2 className="text-2xl font-bold text-gray-800 mb-6">Commission Management</h2>
 
-    {!commissionData?.commissionEnabled ? (
-      <div className="text-center py-12 bg-yellow-50 rounded-xl">
-        <div className="text-6xl mb-4">⚠️</div>
-        <h3 className="text-2xl font-bold text-yellow-800 mb-2">Commission Disabled</h3>
-        <p className="text-yellow-700">Commission system is currently OFF.</p>
-        <p className="text-yellow-600 text-sm mt-2">Render me COMMISSION_ENABLED=true karo to enable karne ke liye.</p>
-      </div>
-    ) : (
-      <div className="space-y-6">
-
-        {/* Summary Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div className="bg-red-50 rounded-xl p-6 text-center">
-            <p className="text-gray-600 text-sm mb-1">Total Pending</p>
-            <p className="text-3xl font-bold text-red-600">
-              ₹{commissionData?.summary?.totalPending || 0}
-            </p>
-          </div>
-          <div className="bg-green-50 rounded-xl p-6 text-center">
-            <p className="text-gray-600 text-sm mb-1">Total Collected</p>
-            <p className="text-3xl font-bold text-green-600">
-              ₹{commissionData?.summary?.totalCollected || 0}
-            </p>
-          </div>
-          <div className="bg-blue-50 rounded-xl p-6 text-center">
-            <p className="text-gray-600 text-sm mb-1">Commission Rate</p>
-            <p className="text-3xl font-bold text-blue-600">
-              {commissionData?.commissionRate || 0}%
-            </p>
-          </div>
-        </div>
-
-        {/* Workers With Pending */}
-        {commissionData?.workersWithPending?.length > 0 && (
-          <div>
-            <h3 className="text-xl font-bold text-gray-800 mb-4">⏳ Workers With Pending Commission</h3>
-            <div className="overflow-x-auto">
-              <table className="min-w-full divide-y divide-gray-200">
-                <thead className="bg-gray-50">
-                  <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Worker</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Pending Amount</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Pending Count</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
-                  </tr>
-                </thead>
-                <tbody className="bg-white divide-y divide-gray-200">
-                  {commissionData.workersWithPending.map((worker) => (
-                    <tr key={worker._id} className="hover:bg-gray-50">
-                      <td className="px-6 py-4">
-                        <div>
-                          <p className="font-medium text-gray-900">{worker.name}</p>
-                          <p className="text-sm text-gray-500">{worker.phone}</p>
-                        </div>
-                      </td>
-                      <td className="px-6 py-4">
-                        <span className="font-bold text-red-600">
-                          ₹{worker.commission?.totalPending || 0}
-                        </span>
-                      </td>
-                      <td className="px-6 py-4">
-                        <span className="font-bold">
-                          {worker.commission?.pendingCount || 0}
-                        </span>
-                      </td>
-                      <td className="px-6 py-4">
-                        {worker.commission?.isBlocked ? (
-                          <span className="px-3 py-1 bg-red-100 text-red-800 rounded-full text-xs font-medium">
-                            🚫 Blocked
-                          </span>
-                        ) : (
-                          <span className="px-3 py-1 bg-yellow-100 text-yellow-800 rounded-full text-xs font-medium">
-                            ⏳ Pending
-                          </span>
-                        )}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        )}
-
-        {/* Recent Transactions */}
-        {commissionData?.recentTransactions?.length > 0 && (
-          <div>
-            <h3 className="text-xl font-bold text-gray-800 mb-4">📋 Recent Transactions</h3>
-            <div className="space-y-3">
-              {commissionData.recentTransactions.map((transaction) => (
-                <div key={transaction._id} className="border border-gray-200 rounded-xl p-4">
-                  <div className="flex justify-between items-center">
-                    <div>
-                      <p className="font-bold text-gray-800">
-                        Worker: {transaction.worker?.name}
-                      </p>
-                      <p className="text-sm text-gray-600">
-                        Customer: {transaction.customer?.name}
-                      </p>
-                      <p className="text-sm text-gray-600">
-                        Method: {transaction.method} |
-                        Amount: ₹{transaction.amount}
-                      </p>
-                    </div>
-                    <div className="text-right">
-                      <p className="font-bold text-purple-600">
-                        Commission: ₹{transaction.commissionAmount}
-                      </p>
-                      <span className={`px-3 py-1 rounded-full text-xs font-medium ${
-                        transaction.commissionStatus === 'collected'
-                          ? 'bg-green-100 text-green-800'
-                          : transaction.commissionStatus === 'pending'
-                          ? 'bg-yellow-100 text-yellow-800'
-                          : 'bg-gray-100 text-gray-800'
-                      }`}>
-                        {transaction.commissionStatus}
-                      </span>
-                    </div>
+                {!commissionData?.commissionEnabled ? (
+                  <div className="text-center py-12 bg-yellow-50 rounded-xl">
+                    <div className="text-6xl mb-4">⚠️</div>
+                    <h3 className="text-2xl font-bold text-yellow-800 mb-2">Commission Disabled</h3>
+                    <p className="text-yellow-700">Commission system is currently OFF.</p>
+                    <p className="text-yellow-600 text-sm mt-2">Render me COMMISSION_ENABLED=true karo to enable karne ke liye.</p>
                   </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
+                ) : (
+                  <div className="space-y-6">
 
-        {/* No Data */}
-        {commissionData?.workersWithPending?.length === 0 && (
-          <div className="text-center py-8 bg-green-50 rounded-xl">
-            <div className="text-5xl mb-3">✅</div>
-            <h3 className="text-xl font-bold text-green-800">All Clear!</h3>
-            <p className="text-green-600">No pending commissions from any worker</p>
-          </div>
-        )}
-      </div>
-    )}
-  </div>
-)}
+                    {/* Summary Cards */}
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                      <div className="bg-red-50 rounded-xl p-6 text-center">
+                        <p className="text-gray-600 text-sm mb-1">Total Pending</p>
+                        <p className="text-3xl font-bold text-red-600">
+                          ₹{commissionData?.summary?.totalPending || 0}
+                        </p>
+                      </div>
+                      <div className="bg-green-50 rounded-xl p-6 text-center">
+                        <p className="text-gray-600 text-sm mb-1">Total Collected</p>
+                        <p className="text-3xl font-bold text-green-600">
+                          ₹{commissionData?.summary?.totalCollected || 0}
+                        </p>
+                      </div>
+                      <div className="bg-blue-50 rounded-xl p-6 text-center">
+                        <p className="text-gray-600 text-sm mb-1">Commission Rate</p>
+                        <p className="text-3xl font-bold text-blue-600">
+                          {commissionData?.commissionRate || 0}%
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* Workers With Pending */}
+                    {commissionData?.workersWithPending?.length > 0 && (
+                      <div>
+                        <h3 className="text-xl font-bold text-gray-800 mb-4">⏳ Workers With Pending Commission</h3>
+                        <div className="overflow-x-auto">
+                          <table className="min-w-full divide-y divide-gray-200">
+                            <thead className="bg-gray-50">
+                              <tr>
+                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Worker</th>
+                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Pending Amount</th>
+                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Pending Count</th>
+                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
+                              </tr>
+                            </thead>
+                            <tbody className="bg-white divide-y divide-gray-200">
+                              {commissionData.workersWithPending.map((worker) => (
+                                <tr key={worker._id} className="hover:bg-gray-50">
+                                  <td className="px-6 py-4">
+                                    <div>
+                                      <p className="font-medium text-gray-900">{worker.name}</p>
+                                      <p className="text-sm text-gray-500">{worker.phone}</p>
+                                    </div>
+                                  </td>
+                                  <td className="px-6 py-4">
+                                    <span className="font-bold text-red-600">
+                                      ₹{worker.commission?.totalPending || 0}
+                                    </span>
+                                  </td>
+                                  <td className="px-6 py-4">
+                                    <span className="font-bold">
+                                      {worker.commission?.pendingCount || 0}
+                                    </span>
+                                  </td>
+                                  <td className="px-6 py-4">
+                                    {worker.commission?.isBlocked ? (
+                                      <span className="px-3 py-1 bg-red-100 text-red-800 rounded-full text-xs font-medium">
+                                        🚫 Blocked
+                                      </span>
+                                    ) : (
+                                      <span className="px-3 py-1 bg-yellow-100 text-yellow-800 rounded-full text-xs font-medium">
+                                        ⏳ Pending
+                                      </span>
+                                    )}
+                                  </td>
+                                </tr>
+                              ))}
+                            </tbody>
+                          </table>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Recent Transactions */}
+                    {commissionData?.recentTransactions?.length > 0 && (
+                      <div>
+                        <h3 className="text-xl font-bold text-gray-800 mb-4">📋 Recent Transactions</h3>
+                        <div className="space-y-3">
+                          {commissionData.recentTransactions.map((transaction) => (
+                            <div key={transaction._id} className="border border-gray-200 rounded-xl p-4">
+                              <div className="flex justify-between items-center">
+                                <div>
+                                  <p className="font-bold text-gray-800">
+                                    Worker: {transaction.worker?.name}
+                                  </p>
+                                  <p className="text-sm text-gray-600">
+                                    Customer: {transaction.customer?.name}
+                                  </p>
+                                  <p className="text-sm text-gray-600">
+                                    Method: {transaction.method} |
+                                    Amount: ₹{transaction.amount}
+                                  </p>
+                                </div>
+                                <div className="text-right">
+                                  <p className="font-bold text-purple-600">
+                                    Commission: ₹{transaction.commissionAmount}
+                                  </p>
+                                  <span className={`px-3 py-1 rounded-full text-xs font-medium ${
+                                    transaction.commissionStatus === 'collected'
+                                      ? 'bg-green-100 text-green-800'
+                                      : transaction.commissionStatus === 'pending'
+                                      ? 'bg-yellow-100 text-yellow-800'
+                                      : 'bg-gray-100 text-gray-800'
+                                  }`}>
+                                    {transaction.commissionStatus}
+                                  </span>
+                                </div>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* No Data */}
+                    {commissionData?.workersWithPending?.length === 0 && (
+                      <div className="text-center py-8 bg-green-50 rounded-xl">
+                        <div className="text-5xl mb-3">✅</div>
+                        <h3 className="text-xl font-bold text-green-800">All Clear!</h3>
+                        <p className="text-green-600">No pending commissions from any worker</p>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Pending Payouts Tab */}
+            {activeTab === 'payouts' && (
+              <div>
+                <h2 className="text-2xl font-bold text-gray-800 mb-6">💸 Pending Worker Payouts</h2>
+
+                {pendingPayouts.length === 0 ? (
+                  <div className="text-center py-12 bg-green-50 rounded-xl">
+                    <div className="text-6xl mb-4">✅</div>
+                    <h3 className="text-2xl font-bold text-green-800 mb-2">All Payments Complete!</h3>
+                    <p className="text-green-700">No pending payouts to workers</p>
+                  </div>
+                ) : (
+                  <div className="space-y-6">
+                    
+                    {/* Summary */}
+                    <div className="bg-gradient-to-r from-orange-50 to-red-50 rounded-xl p-6 border-2 border-orange-200">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <h3 className="text-xl font-bold text-gray-800 mb-1">
+                            Total Pending Payouts
+                          </h3>
+                          <p className="text-gray-600">
+                            {pendingPayouts.length} workers waiting for payment
+                          </p>
+                        </div>
+                        <div className="text-right">
+                          <p className="text-4xl font-bold text-red-600">
+                            ₹{pendingPayouts.reduce((sum, p) => sum + p.totalPending, 0)}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Workers List */}
+                    {pendingPayouts.map((payout) => (
+                      <div key={payout.workerId} className="bg-white border-2 border-gray-200 rounded-xl p-6 hover:shadow-lg transition-shadow">
+                        
+                        {/* Worker Header */}
+                        <div className="flex items-start justify-between mb-4 pb-4 border-b border-gray-200">
+                          <div>
+                            <h3 className="text-xl font-bold text-gray-800">{payout.workerName}</h3>
+                            <p className="text-sm text-gray-600">{payout.workerPhone}</p>
+                            {payout.lastPayoutDate && (
+                              <p className="text-xs text-gray-500 mt-1">
+                                Last payout: {new Date(payout.lastPayoutDate).toLocaleDateString('en-IN')}
+                              </p>
+                            )}
+                          </div>
+                          <div className="text-right">
+                            <p className="text-sm text-gray-600 mb-1">Total Pending</p>
+                            <p className="text-3xl font-bold text-red-600">
+                              ₹{payout.totalPending}
+                            </p>
+                            <p className="text-xs text-gray-500 mt-1">
+                              {payout.pendingBookings.length} bookings
+                            </p>
+                          </div>
+                        </div>
+
+                        {/* Bookings List */}
+                        <div className="space-y-2 mb-4">
+                          <h4 className="font-semibold text-gray-700 text-sm mb-2">Pending Bookings:</h4>
+                          {payout.pendingBookings.map((booking) => (
+                            <div key={booking.bookingId} className="flex items-center justify-between bg-gray-50 rounded-lg p-3">
+                              <div>
+                                <p className="font-medium text-gray-800">
+                                  Booking #{booking.bookingId}
+                                </p>
+                                <p className="text-xs text-gray-500">
+                                  Paid on: {new Date(booking.paidAt).toLocaleDateString('en-IN')}
+                                </p>
+                              </div>
+                              <div className="text-right">
+                                <p className="font-bold text-gray-800">₹{booking.amount}</p>
+                                <button
+                                  onClick={() => handleMarkPaid(booking.bookingId, payout.workerName, booking.amount)}
+                                  className="mt-1 px-3 py-1 bg-green-500 text-white rounded-lg text-xs font-semibold hover:bg-green-600 transition-colors"
+                                >
+                                  ✅ Mark Paid
+                                </button>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+
+                        {/* Instructions */}
+                        <div className="pt-4 border-t border-gray-200">
+                          <p className="text-sm text-gray-600 mb-3">
+                            💡 <strong>Instructions:</strong> Send ₹{payout.totalPending} via UPI/Bank to worker, 
+                            then mark each booking as paid above.
+                          </p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+
           </div>
         </div>
       </div>

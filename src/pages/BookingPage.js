@@ -34,7 +34,7 @@ function BookingPage() {
     longitude: '',
     
     // Scheduling
-    scheduledDate: '',
+    scheduledDate: new Date().toISOString().split('T')[0],
     scheduledTime: 'morning', // morning, afternoon, evening
     
     // Additional notes

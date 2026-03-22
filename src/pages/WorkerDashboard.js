@@ -253,6 +253,60 @@ const [commission, setCommission] = useState(null);
             </div>
           </div>
 
+          {/* Earnings Summary - NEW! */}
+          <div className="bg-gradient-to-br from-green-50 to-blue-50 rounded-2xl shadow-lg p-6 mb-8 border-2 border-green-200">
+            <h3 className="text-2xl font-bold text-gray-800 mb-4">💰 Your Earnings</h3>
+            
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              
+              {/* Pending Earnings */}
+              <div className="bg-white rounded-xl p-5 text-center border-2 border-yellow-200">
+                <p className="text-gray-600 text-sm mb-1">⏳ Pending Payment</p>
+                <p className="text-3xl font-bold text-yellow-600 mb-1">
+                  ₹{worker?.earnings?.pending || 0}
+                </p>
+                <p className="text-xs text-gray-500">Will be paid on Friday</p>
+              </div>
+
+              {/* Paid Earnings */}
+              <div className="bg-white rounded-xl p-5 text-center border-2 border-green-200">
+                <p className="text-gray-600 text-sm mb-1">✅ Total Received</p>
+                <p className="text-3xl font-bold text-green-600 mb-1">
+                  ₹{worker?.earnings?.paid || 0}
+                </p>
+                {worker?.earnings?.lastPayoutDate && (
+                  <p className="text-xs text-gray-500">
+                    Last: {new Date(worker.earnings.lastPayoutDate).toLocaleDateString('en-IN')}
+                  </p>
+                )}
+              </div>
+
+              {/* Total Earnings */}
+              <div className="bg-white rounded-xl p-5 text-center border-2 border-blue-200">
+                <p className="text-gray-600 text-sm mb-1">💵 Total Earnings</p>
+                <p className="text-3xl font-bold text-blue-600 mb-1">
+                  ₹{worker?.earnings?.total || 0}
+                </p>
+                <p className="text-xs text-gray-500">All-time</p>
+              </div>
+            </div>
+
+            {/* Payout Info */}
+            {worker?.earnings?.pending > 0 && (
+              <div className="mt-4 bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+                <div className="flex items-center space-x-3">
+                  <span className="text-2xl">📅</span>
+                  <div>
+                    <p className="font-semibold text-gray-800">Next Payout: Friday</p>
+                    <p className="text-sm text-gray-600">
+                      Admin will transfer ₹{worker.earnings.pending} to your account via UPI/Bank Transfer
+                    </p>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+
           {/* Tabs */}
           <div className="bg-white rounded-2xl shadow-lg overflow-hidden">
             
@@ -357,10 +411,25 @@ const [commission, setCommission] = useState(null);
                                   <p>💰 Estimated: ₹{booking.pricing.estimatedCost.min} - ₹{booking.pricing.estimatedCost.max}</p>
                                 )}
                                 {booking.pricing?.finalAmount && (
-                                  <p className="font-bold text-green-600">
-                                    ✅ Final Amount: ₹{booking.pricing.finalAmount}
-                                  </p>
-                                )}
+  <p className="font-bold text-green-600">
+    ✅ Final Amount: ₹{booking.pricing.finalAmount}
+  </p>
+)}
+
+{/* PAYMENT STATUS - NEW CODE */}
+{booking.status === 'completed' && booking.pricing?.finalAmount && (
+  <p className="mt-1">
+    {booking.payment?.status === 'completed' ? (
+      <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-semibold bg-green-100 text-green-700">
+        💵 Payment Received
+      </span>
+    ) : (
+      <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-semibold bg-yellow-100 text-yellow-700">
+        ⏳ Payment Pending - ₹{booking.pricing.finalAmount}
+      </span>
+    )}
+  </p>
+)}
                               </div>
                             </div>
                           </div>
