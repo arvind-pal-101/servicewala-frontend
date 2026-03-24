@@ -99,7 +99,7 @@ function Footer() {
               </li>
               <li className="flex items-center space-x-2">
                 <span className="text-xl">✉️</span>
-                <span>support@servicebabu.in</span>
+                <span>contact@servicebabu.in</span>
               </li>
             </ul>
           </div>
