@@ -91,7 +91,7 @@ function Footer() {
             <ul className="space-y-3">
               <li className="flex items-start space-x-2">
                 <span className="text-xl">📍</span>
-                <span>Ram Ghat, Ayodhya<br />Uttar Pradesh 224123</span>
+                <span>Ram Ghat, Ayodhya<br />Uttar Pradesh 224001</span>
               </li>
               <li className="flex items-center space-x-2">
   <span className="text-xl">📞</span>
