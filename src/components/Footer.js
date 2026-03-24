@@ -96,7 +96,7 @@ function Footer() {
               <li className="flex items-center space-x-2">
   <span className="text-xl">📞</span>
   <a href="tel:+919876543210" className="hover:underline">
-    +91 98765 43210
+    +91 95651 05299
   </a>
 </li>
               <li className="flex items-center space-x-2">
