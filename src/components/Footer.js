@@ -94,13 +94,17 @@ function Footer() {
                 <span>Ram Ghat, Ayodhya<br />Uttar Pradesh 224123</span>
               </li>
               <li className="flex items-center space-x-2">
-                <span className="text-xl">📞</span>
-                <span>+91 98765 43210</span>
-              </li>
+  <span className="text-xl">📞</span>
+  <a href="tel:+919876543210" className="hover:underline">
+    +91 98765 43210
+  </a>
+</li>
               <li className="flex items-center space-x-2">
-                <span className="text-xl">✉️</span>
-                <span>contact@servicebabu.in</span>
-              </li>
+  <span className="text-xl">✉️</span>
+  <a href="mailto:contact@servicebabu.in" className="hover:underline">
+    contact@servicebabu.in
+  </a>
+</li>
             </ul>
           </div>
         </div>
