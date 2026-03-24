@@ -9,7 +9,20 @@ import axios from 'axios';
 const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
 
 function Home() {
-  const [categories, setCategories] = useState([]);
+  const DEFAULT_CATEGORIES = [
+  { _id: '1', name: 'Electrician', icon: '⚡' },
+  { _id: '2', name: 'Plumber', icon: '🔧' },
+  { _id: '3', name: 'Carpenter', icon: '🪚' },
+  { _id: '4', name: 'Painter', icon: '🎨' },
+  { _id: '5', name: 'AC Repair', icon: '❄️' },
+  { _id: '6', name: 'Mechanic', icon: '🔩' },
+  { _id: '7', name: 'Tutor', icon: '📚' },
+  { _id: '8', name: 'Cleaner', icon: '🧹' },
+];
+
+  const [categories, setCategories] = useState(DEFAULT_CATEGORIES);
+  const [categoriesLoading, setCategoriesLoading] = useState(true);
+
   const [searchCity, setSearchCity] = useState('Ayodhya');
   const [stats, setStats] = useState(null);
   const navigate = useNavigate();
@@ -22,9 +35,13 @@ function Home() {
   const fetchCategories = async () => {
     try {
       const response = await categoryAPI.getAll();
-      setCategories(response.data.data);
+      if (response.data.data?.length > 0) {
+        setCategories(response.data.data);
+      }
     } catch (error) {
       console.error('Error fetching categories:', error);
+    } finally {
+      setCategoriesLoading(false);
     }
   };
 
@@ -134,12 +151,14 @@ function Home() {
           </div>
 
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-            {categories.map((category) => (
-              <div
-                key={category._id}
-                onClick={() => navigate(`/search?category=${category._id}`)}
-                className="card-hover cursor-pointer bg-white rounded-2xl p-6 shadow-lg text-center group"
-              >
+  {categories.map((category) => (
+    <div
+      key={category._id}
+      onClick={() => !categoriesLoading && navigate(`/search?category=${category._id}`)}
+      className={`card-hover cursor-pointer bg-white rounded-2xl p-6 shadow-lg text-center group transition-all ${
+        categoriesLoading ? 'opacity-70' : 'opacity-100'
+      }`}
+    >
                 <div className="text-6xl mb-4 group-hover:scale-110 transition-transform">
                   {category.icon}
                 </div>
